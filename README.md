@@ -11,7 +11,6 @@ A modern, interactive financial planning tool designed to help you demystify the
 
 **Key Features:**
 - **Smart Calculator**: Input your financials and get your "Freedom Date" instantly.
-- **Interactive Visuals**: Dynamic graphs showing your wealth accumulation over time.
 - **FIRE Types Guide**: Learn the differences between Coast, Barista, Lean, Traditional, Slow, and Fat FIRE.
 - **PDF Reports**: Download a detailed summary of your financial roadmap.
 - **Responsive Design**: Beautifully crafted interface that works on all devices.
@@ -26,31 +25,58 @@ A modern, interactive financial planning tool designed to help you demystify the
     *   Navigate to the **Calculator** section.
     *   Enter your current age, income, expenses, and savings.
     *   Adjust the sliders to see how small changes impact your freedom date.
-4.  **Visualize**: Watch the graph update in real-time as you tweak your inputs.
-5.  **Save Your Plan**: Click "Download Report" to get a professional PDF of your strategy.
+4.  **Save Your Plan**: Click "Download Report" to get a professional PDF of your strategy.
 
----
+## How to Run This Website Locally
 
-## ⚡ Deployment
+**This is a frontend-only application built using React and Vite. No backend or authentication setup is required.**
 
-This project is optimized for deployment on **Vercel**.
+-Prerequisites
 
-1.  Push this repository to GitHub.
-2.  Import the project in Vercel.
-3.  Vercel will automatically detect `Vite` settings.
-4.  Click **Deploy**.
+Node.js (v16 or above recommended)
 
-*(No complex configuration required. It just works.)*
+npm (comes with Node.js)
 
----
+-Steps to Run
 
-## 👩‍💻 Credits
+Clone the repository:
 
-**Developed by [Rebaka Meda](https://www.linkedin.com/in/rebaka-meda-6832b2367)**  
-*Crafting digital experiences with code and creativity.*
+git clone <repository-url>
 
----
 
-### 📝 A Quirky Note
+-Navigate to the project directory:
+
+cd project-folder-name
+
+
+-Install dependencies:
+
+npm install
+
+
+-Start the development server:
+
+npm run dev
+
+
+-Open your browser and visit:
+
+http://localhost:5173
+
+
+**The website will load instantly and you can start using the FIRE calculator without any login or setup.**
+
+**Production Build (Optional)**
+
+-To create a production build:
+
+npm run build
+
+
+-To preview the production build locally:
+
+npm run preview
+
+
 *Code, Caffeine, and Compound Interest.*  
-*Hand-crafted by **Rebaka Meda** to fast-track your freedom. 🚀*
+*Hand-crafted by **[Rebaka Meda](https://www.linkedin.com/in/rebaka-meda-6832b2367)** to fast-track your freedom. 🚀*
