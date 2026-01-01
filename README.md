@@ -3,7 +3,7 @@
 
 A modern, interactive financial planning tool designed to help you demystify the path to Financial Freedom. Built with precision, aesthetics, and user experience in mind.
 
-
+---
 
 ## 🚀 About The Project
 
@@ -29,42 +29,42 @@ A modern, interactive financial planning tool designed to help you demystify the
 
 ---
 
-## How to Run This Website Locally
+## 💻 How to Run This Website Locally
 
 **This is a frontend-only application built using React and Vite. No backend or authentication setup is required.**
 
-Prerequisites
+### 📦 Prerequisites
 
 Node.js (v16 or above recommended)
 
 npm (comes with Node.js)
 
-**Steps to Run**
+### ▶️ Steps to Run
 
 Clone the repository:
 ```bash
 git clone https://github.com/Rebaka8/retirement-calculator-app
-
+```
 
 Navigate to the project directory:
 ```bash
 cd fire-calculator
-
+```
 
 Install dependencies:
 ```bash
 npm install
-
+```
 
 Start the development server:
 ```bash
 npm run dev
-
+```
 
 Open your browser and visit:
 ```bash
 http://localhost:5173
-
+```
 
 **The website will load instantly and you can start using the FIRE calculator without any login or setup.**
 
@@ -75,12 +75,12 @@ http://localhost:5173
 To create a production build:
 ```bash
 npm run build
-
+```
 
 To preview the production build locally:
 ```bash
 npm run preview
-
+```
 ---
 
 *Code, Caffeine, and Compound Interest.*  
