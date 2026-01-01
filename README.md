@@ -3,7 +3,7 @@
 
 A modern, interactive financial planning tool designed to help you demystify the path to Financial Freedom. Built with precision, aesthetics, and user experience in mind.
 
-![FIRE Tracker Banner](https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=1200)
+
 
 ## 🚀 About The Project
 
@@ -42,31 +42,26 @@ npm (comes with Node.js)
 **Steps to Run**
 
 Clone the repository:
-```md
 ```bash
 git clone https://github.com/Rebaka8/retirement-calculator-app
 
 
 Navigate to the project directory:
-```md
 ```bash
 cd fire-calculator
 
 
 Install dependencies:
-```md
 ```bash
 npm install
 
 
 Start the development server:
-```md
 ```bash
 npm run dev
 
 
 Open your browser and visit:
-```md
 ```bash
 http://localhost:5173
 
@@ -78,13 +73,11 @@ http://localhost:5173
 **Production Build (Optional)**
 
 To create a production build:
-```md
 ```bash
 npm run build
 
 
 To preview the production build locally:
-```md
 ```bash
 npm run preview
 
