@@ -33,36 +33,41 @@ A modern, interactive financial planning tool designed to help you demystify the
 
 **This is a frontend-only application built using React and Vite. No backend or authentication setup is required.**
 
--Prerequisites
+Prerequisites
 
 Node.js (v16 or above recommended)
 
 npm (comes with Node.js)
 
--Steps to Run
+**Steps to Run**
 
 Clone the repository:
-
+```md
+```bash
 git clone https://github.com/Rebaka8/retirement-calculator-app
 
 
--Navigate to the project directory:
-
+Navigate to the project directory:
+```md
+```bash
 cd fire-calculator
 
 
--Install dependencies:
-
+Install dependencies:
+```md
+```bash
 npm install
 
 
--Start the development server:
-
+Start the development server:
+```md
+```bash
 npm run dev
 
 
--Open your browser and visit:
-
+Open your browser and visit:
+```md
+```bash
 http://localhost:5173
 
 
@@ -72,13 +77,15 @@ http://localhost:5173
 
 **Production Build (Optional)**
 
--To create a production build:
-
+To create a production build:
+```md
+```bash
 npm run build
 
 
--To preview the production build locally:
-
+To preview the production build locally:
+```md
+```bash
 npm run preview
 
 ---
