@@ -27,6 +27,8 @@ A modern, interactive financial planning tool designed to help you demystify the
     *   Adjust the sliders to see how small changes impact your freedom date.
 4.  **Save Your Plan**: Click "Download Report" to get a professional PDF of your strategy.
 
+---
+
 ## How to Run This Website Locally
 
 **This is a frontend-only application built using React and Vite. No backend or authentication setup is required.**
@@ -41,12 +43,12 @@ npm (comes with Node.js)
 
 Clone the repository:
 
-git clone <repository-url>
+git clone https://github.com/Rebaka8/retirement-calculator-app
 
 
 -Navigate to the project directory:
 
-cd project-folder-name
+cd fire-calculator
 
 
 -Install dependencies:
@@ -66,6 +68,8 @@ http://localhost:5173
 
 **The website will load instantly and you can start using the FIRE calculator without any login or setup.**
 
+---
+
 **Production Build (Optional)**
 
 -To create a production build:
@@ -77,6 +81,7 @@ npm run build
 
 npm run preview
 
+---
 
 *Code, Caffeine, and Compound Interest.*  
 *Hand-crafted by **[Rebaka Meda](https://www.linkedin.com/in/rebaka-meda-6832b2367)** to fast-track your freedom. 🚀*
