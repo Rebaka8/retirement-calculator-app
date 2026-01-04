@@ -1,8 +1,35 @@
 import React, { useState } from 'react';
 import { useFire } from '../../context/FireContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Share2, RefreshCw, TrendingUp, Info, Zap, AlertTriangle, CheckCircle, Target, Wallet } from 'lucide-react';
+import { Download, Share2, RefreshCw, TrendingUp, Zap, AlertTriangle, CheckCircle, Target, Wallet } from 'lucide-react';
 import { generateFireReport } from '../Report/DownloadReport';
+import Tooltip from '../UI/Tooltip';
+
+const InputPair = ({ label, value, min, max, step, onChange, color = "blue", suffix = "", tooltip }) => (
+    <div>
+        <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center">
+                <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">{label}</label>
+                {tooltip && <Tooltip text={tooltip} />}
+            </div>
+            <div className="flex items-center gap-2">
+                <input
+                    type="number"
+                    value={value}
+                    onChange={onChange}
+                    className={`w-36 bg-white border border-slate-200 rounded-lg px-3 py-2 text-right font-bold text-${color}-600 focus:outline-none focus:ring-2 focus:ring-${color}-500 transition-all`}
+                />
+                {suffix && <span className="text-sm font-bold text-slate-400">{suffix}</span>}
+            </div>
+        </div>
+        <input
+            type="range" min={min} max={max} step={step}
+            value={value}
+            onChange={onChange}
+            className={`w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-${color}-600`}
+        />
+    </div>
+);
 
 const FireWidget = () => {
     const {
@@ -55,56 +82,8 @@ const FireWidget = () => {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    // Helper: Comparison Card
-    const ComparisonCard = ({ type, data: cardData, color }) => {
-        const rawTarget = fireNumbers[type.toLowerCase().split(' ')[0]] || fireNumbers.traditional || 1;
+    // Helper: Input Field Pair Moved Outside
 
-        return (
-            <div className={`relative overflow-hidden rounded-xl p-4 border border-slate-100 shadow-sm transition-all hover:shadow-md bg-white group`}>
-                <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-${color}-500`} />
-                <div className="pl-3 flex flex-col justify-between h-full">
-                    <div>
-                        <h4 className="font-bold text-slate-700 text-xs sm:text-sm uppercase tracking-wide mb-1">{type}</h4>
-                        <div className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
-                            {cardData.corpus} <span className="text-xs font-normal text-slate-400">Cr</span>
-                        </div>
-                    </div>
-
-                    {/* ENHANCED YEARS DISPLAY */}
-                    <div className="mt-3 flex items-center justify-between">
-                        <div className="text-[10px] uppercase font-bold text-slate-400">Time to Reach</div>
-                        <div className={`text-base font-extrabold px-2 py-1 rounded bg-${color}-50 text-${color}-600`}>
-                            {cardData.years} {cardData.years === 'Invest Now' ? '' : 'Yrs'}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    // Helper: Input Field Pair (Label + Number Input + Slider)
-    const InputPair = ({ label, value, min, max, step, onChange, color = "blue", suffix = "" }) => (
-        <div>
-            <div className="flex justify-between items-center mb-4">
-                <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">{label}</label>
-                <div className="flex items-center gap-2">
-                    <input
-                        type="number"
-                        value={value}
-                        onChange={onChange}
-                        className={`w-32 bg-white border border-slate-200 rounded-lg px-3 py-1 text-right font-bold text-${color}-600 focus:outline-none focus:ring-2 focus:ring-${color}-500`}
-                    />
-                    {suffix && <span className="text-sm font-bold text-slate-400">{suffix}</span>}
-                </div>
-            </div>
-            <input
-                type="range" min={min} max={max} step={step}
-                value={value}
-                onChange={onChange}
-                className={`w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-${color}-600`}
-            />
-        </div>
-    );
 
     return (
         <section className="py-12 bg-white" id="calculator-section">
@@ -154,6 +133,7 @@ const FireWidget = () => {
                                 <>
                                     <InputPair
                                         label="Annual Income"
+                                        tooltip="Your total yearly earnings before tax from all sources."
                                         value={data.annualIncome || 0}
                                         min={300000} max={20000000} step={50000}
                                         onChange={(e) => updateData('annualIncome', Number(e.target.value))}
@@ -162,6 +142,7 @@ const FireWidget = () => {
 
                                     <InputPair
                                         label="Annual Expenses"
+                                        tooltip="How much you spend in a year. Be honest! This determines your FIRE number."
                                         value={data.annualExpenses || 0}
                                         min={100000} max={Math.max((data.annualIncome || 0), 100000)} step={10000}
                                         onChange={(e) => updateData('annualExpenses', Number(e.target.value))}
@@ -178,6 +159,7 @@ const FireWidget = () => {
                                 <>
                                     <InputPair
                                         label="My Dream Corpus"
+                                        tooltip="The total amount of money you want to accumulate before retiring."
                                         value={data.targetCorpus || 50000000}
                                         min={10000000} max={500000000} step={1000000}
                                         onChange={(e) => updateData('targetCorpus', Number(e.target.value))}
@@ -186,6 +168,7 @@ const FireWidget = () => {
 
                                     <InputPair
                                         label="Years to Achieve"
+                                        tooltip="In how many years do you want to reach this goal?"
                                         value={data.yearsToRetire || 15}
                                         min={1} max={50} step={1}
                                         onChange={(e) => updateData('yearsToRetire', Number(e.target.value))}
@@ -199,16 +182,22 @@ const FireWidget = () => {
 
                             {/* GLOBAL ASSUMPTIONS (Visible in both modes) */}
                             <div className="space-y-6">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Global Settings</label>
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center">
+                                    Global Settings
+                                    <Tooltip text="Assumptions used to project your future wealth." />
+                                </label>
 
                                 <div>
                                     <div className="flex justify-between items-center mb-2">
-                                        <label className="text-xs font-bold text-slate-500">Current Savings</label>
+                                        <div className="flex items-center">
+                                            <label className="text-xs font-bold text-slate-500">Current Savings</label>
+                                            <Tooltip text="The total value of your existing investments (PF, Stocks, MFs, etc.) today." />
+                                        </div>
                                         <input
                                             type="number"
                                             value={data.currentCorpus || 0}
                                             onChange={(e) => updateData('currentCorpus', Number(e.target.value))}
-                                            className="w-32 bg-white border border-slate-200 rounded text-right px-2 py-1 text-sm font-bold text-slate-700 outline-none focus:ring-1 focus:ring-slate-400"
+                                            className="w-36 bg-white border border-slate-200 rounded-lg text-right px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-slate-400 transition-all"
                                         />
                                     </div>
                                     <input
@@ -221,21 +210,27 @@ const FireWidget = () => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-400 mb-2">Return Rate (%)</label>
+                                        <label className="block text-xs font-bold text-slate-400 mb-2 flex items-center">
+                                            Return Rate (%)
+                                            <Tooltip text="Expected average annual annual growth of your portfolio." />
+                                        </label>
                                         <input
                                             type="number"
                                             value={data.investmentReturnRate}
                                             onChange={(e) => updateData('investmentReturnRate', Number(e.target.value))}
-                                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-emerald-600 outline-none focus:border-emerald-500"
+                                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-3 text-sm font-bold text-emerald-600 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-400 mb-2">Inflation (%)</label>
+                                        <label className="block text-xs font-bold text-slate-400 mb-2 flex items-center">
+                                            Inflation (%)
+                                            <Tooltip text="The rate at which cost of living increases. Avg ~6% in India." />
+                                        </label>
                                         <input
                                             type="number"
                                             value={data.inflationRate}
                                             onChange={(e) => updateData('inflationRate', Number(e.target.value))}
-                                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-rose-600 outline-none focus:border-rose-500"
+                                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-3 text-sm font-bold text-rose-600 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all"
                                         />
                                     </div>
                                 </div>

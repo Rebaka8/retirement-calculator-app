@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import LegalModal from './components/LegalModal';
 import { Github, Linkedin } from 'lucide-react';
 import { FireProvider } from './context/FireContext';
 import Hero from './components/Landing/Hero';
@@ -13,6 +14,48 @@ import Logo from './components/Logo';
 
 const MainLayout = () => {
   const calculatorRef = useRef(null);
+  const [legalModal, setLegalModal] = useState({ isOpen: false, title: '', content: null });
+
+  const startYear = new Date().getFullYear();
+
+  const PRIVACY_CONTENT = (
+    <>
+      <p className="mb-4"><strong>Effective Date:</strong> January 1, {startYear}</p>
+      <p className="mb-4">Your privacy is important to us. It is FIRE Tracker's policy to respect your privacy regarding any information we may collect from you across our website.</p>
+
+      <h4 className="font-bold text-slate-900 mt-6 mb-2">1. Information We Collect</h4>
+      <p className="mb-4">We do not collect any personal identifiable information (PII) on our servers. All calculations are performed client-side within your browser. The data you enter (income, expenses, corpus) remains on your device and is not transmitted to us.</p>
+
+      <h4 className="font-bold text-slate-900 mt-6 mb-2">2. Local Storage</h4>
+      <p className="mb-4">We may use local storage cookies to save your preferences or input data so you don't have to re-enter it every time you visit. You can clear this data at any time by clearing your browser cache.</p>
+
+      <h4 className="font-bold text-slate-900 mt-6 mb-2">3. Third-Party Services</h4>
+      <p className="mb-4">We may use third-party libraries for analytics or UI components (like fonts and icons) which may collect anonymous usage data.</p>
+    </>
+  );
+
+  const TERMS_CONTENT = (
+    <>
+      <p className="mb-4"><strong>Last Updated:</strong> January 1, {startYear}</p>
+
+      <h4 className="font-bold text-slate-900 mt-6 mb-2">1. Acceptance of Terms</h4>
+      <p className="mb-4">By accessing or using FIRE Tracker, you agree to be bound by these Terms of Service. If you do not agree, please do not use our services.</p>
+
+      <h4 className="font-bold text-slate-900 mt-6 mb-2">2. Educational Purpose Only</h4>
+      <p className="mb-4">The content and tools provided on this website are for educational and informational purposes only. They do not constitute financial, investment, tax, or legal advice.</p>
+
+      <h4 className="font-bold text-slate-900 mt-6 mb-2">3. No Guarantees</h4>
+      <p className="mb-4">We do not guarantee the accuracy, completeness, or reliability of any calculations or information. Future financial outcomes are uncertain, and you should consult with a qualified professional before making financial decisions.</p>
+    </>
+  );
+
+  const openLegal = (type) => {
+    if (type === 'privacy') {
+      setLegalModal({ isOpen: true, title: 'Privacy Policy', content: PRIVACY_CONTENT });
+    } else {
+      setLegalModal({ isOpen: true, title: 'Terms of Service', content: TERMS_CONTENT });
+    }
+  };
 
   const scrollToCalculator = () => {
     calculatorRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -86,11 +129,18 @@ const MainLayout = () => {
           </p>
 
           <div className="flex justify-center gap-6 text-sm text-slate-400 font-medium">
-            <a href="#" className="hover:text-blue-600 transition">Privacy Policy</a>
-            <a href="#" className="hover:text-blue-600 transition">Terms of Service</a>
+            <button onClick={() => openLegal('privacy')} className="hover:text-blue-600 transition">Privacy Policy</button>
+            <button onClick={() => openLegal('terms')} className="hover:text-blue-600 transition">Terms of Service</button>
           </div>
         </div>
       </footer>
+
+      <LegalModal
+        isOpen={legalModal.isOpen}
+        onClose={() => setLegalModal(prev => ({ ...prev, isOpen: false }))}
+        title={legalModal.title}
+        content={legalModal.content}
+      />
     </div>
   );
 };
