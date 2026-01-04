@@ -1,23 +1,17 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, Coffee, Home, Clock, Anchor, Briefcase, ArrowRight, Zap, Star } from 'lucide-react';
+import { TrendingUp, Coffee, Home, Clock, Anchor, Briefcase, ArrowRight, Zap, Star, X } from 'lucide-react';
 import ScrollArrow from '../UI/ScrollArrow';
 
 const FireTypes = () => {
-    // Set 'coast' as default (The lowest entry point)
-    const [activeTab, setActiveTab] = useState('coast');
+    const [selectedFireType, setSelectedFireType] = useState(null);
 
     // Ordered by Savings/Corpus Needed (Ascending)
-    // 1. Coast (Save small lump sum, let it grow)
-    // 2. Barista (Save partial corpus, keep working)
-    // 3. Lean (Save full minimalist corpus)
-    // 4. Traditional (Save full standard corpus)
-    // 5. Slow (Save standard corpus + buffer time)
-    // 6. Fat (Save massive luxury corpus)
     const fireTypes = {
         coast: {
+            id: 'coast',
             title: "Coast FIRE",
-            icon: <Anchor className="w-6 h-6" />,
+            icon: <Anchor className="w-8 h-8" />,
             color: "purple",
             gradient: "from-purple-400 to-fuchsia-600",
             bgGradient: "from-purple-50 via-pink-50 to-rose-50",
@@ -28,20 +22,22 @@ const FireTypes = () => {
             corpus: "Specific Lump Sum Today"
         },
         barista: {
+            id: 'barista',
             title: "Barista FIRE",
-            icon: <Briefcase className="w-6 h-6" />,
+            icon: <Briefcase className="w-8 h-8" />,
             color: "blue",
             gradient: "from-blue-400 to-indigo-600",
             bgGradient: "from-blue-50 via-indigo-50 to-cyan-50",
             desc: "The Hybrid Path",
-            tagline: "Work to Live, Don't Live to Work.",
+            tagline: "Work to Live, Don't Live.",
             detail: "You save enough to cover rent and basics. Then, you quit your high-stress career to work a fun, low-stress job (like a Barista) just for extra cash or health benefits.",
             example: "Aravind quits his 12-hour corporate shift. His investments pay the EMI. He now teaches Guitar 3 hours a day for pocket money and is much happier.",
             corpus: "15x Expenses + Part-time Income"
         },
         lean: {
+            id: 'lean',
             title: "Lean FIRE",
-            icon: <Coffee className="w-6 h-6" />,
+            icon: <Coffee className="w-8 h-8" />,
             color: "emerald",
             gradient: "from-emerald-400 to-green-600",
             bgGradient: "from-emerald-50 via-green-50 to-teal-50",
@@ -52,8 +48,9 @@ const FireTypes = () => {
             corpus: "15x - 20x Annual Expenses"
         },
         traditional: {
+            id: 'traditional',
             title: "Traditional FIRE",
-            icon: <Home className="w-6 h-6" />,
+            icon: <Home className="w-8 h-8" />,
             color: "indigo",
             gradient: "from-indigo-400 to-purple-600",
             bgGradient: "from-indigo-50 via-purple-50 to-violet-50",
@@ -64,8 +61,9 @@ const FireTypes = () => {
             corpus: "25x Annual Expenses"
         },
         slow: {
+            id: 'slow',
             title: "Slow FIRE",
-            icon: <Clock className="w-6 h-6" />,
+            icon: <Clock className="w-8 h-8" />,
             color: "teal",
             gradient: "from-teal-400 to-cyan-600",
             bgGradient: "from-teal-50 via-cyan-50 to-sky-50",
@@ -76,8 +74,9 @@ const FireTypes = () => {
             corpus: "25x - 30x Annual Expenses"
         },
         fat: {
+            id: 'fat',
             title: "Fat FIRE",
-            icon: <Star className="w-6 h-6" />,
+            icon: <Star className="w-8 h-8" />,
             color: "yellow", // Gold/Luxury
             gradient: "from-yellow-400 to-amber-600",
             bgGradient: "from-yellow-50 via-amber-50 to-orange-50",
@@ -90,7 +89,7 @@ const FireTypes = () => {
     };
 
     return (
-        <section className="py-12 relative" id="fire-types">
+        <section className="py-12 relative min-h-screen" id="fire-types">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
                 {/* Header with Visual Pop */}
@@ -111,139 +110,139 @@ const FireTypes = () => {
                     </p>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-8 items-start">
+                {/* Grid Layout for Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                    {Object.values(fireTypes).map((type) => (
+                        <motion.button
+                            key={type.id}
+                            onClick={() => setSelectedFireType(type)}
+                            whileHover={{ y: -5 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`
+                                relative overflow-hidden group text-left p-6 rounded-[2rem] border transition-all duration-300 h-full flex flex-col
+                                bg-white hover:shadow-2xl hover:border-${type.color}-200 border-slate-100 shadow-sm
+                            `}
+                        >
+                            {/* Colorful Gradient Blob Background */}
+                            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${type.gradient} opacity-10 blur-[40px] rounded-full group-hover:opacity-20 transition-opacity`} />
 
-                    {/* Sidebar Buttons (Glassmorphic) */}
-                    <div className="lg:w-1/3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-4 w-full">
-                        {Object.entries(fireTypes).map(([key, type]) => (
-                            <button
-                                key={key}
-                                onClick={() => setActiveTab(key)}
-                                className={`
-                                    group relative overflow-hidden text-left px-6 py-5 rounded-2xl transition-all duration-300 flex items-center gap-4 border
-                                    ${activeTab === key
-                                        ? 'bg-white border-white/50 shadow-xl scale-105 z-10 ring-1 ring-slate-100'
-                                        : 'bg-white/60 border-white/20 hover:bg-white hover:shadow-md text-slate-500'}
-                                `}
-                            >
-                                {/* Active Indicator Bar */}
-                                {activeTab === key && (
-                                    <motion.div
-                                        layoutId="active-marker"
-                                        className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${type.gradient}`}
-                                    />
-                                )}
+                            <div className={`
+                                w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-md
+                                bg-gradient-to-br ${type.gradient} text-white
+                            `}>
+                                {type.icon}
+                            </div>
 
-                                <div className={`
-                                    p-3 rounded-xl shrink-0 transition-colors shadow-sm
-                                    ${activeTab === key ? `bg-gradient-to-br ${type.gradient} text-white` : 'bg-slate-100 text-slate-400 group-hover:scale-110 duration-300'}
-                                `}>
-                                    {type.icon}
-                                </div>
-                                <div className="flex-1">
-                                    <span className={`block font-bold text-base md:text-lg leading-tight ${activeTab === key ? 'text-slate-900' : 'text-slate-600'}`}>
-                                        {type.title}
-                                    </span>
-                                    <span className={`text-xs font-semibold uppercase tracking-wider ${activeTab === key ? `text-${type.color}-600` : 'text-slate-400'}`}>
-                                        {type.desc}
-                                    </span>
-                                </div>
-                            </button>
-                        ))}
-                    </div>
+                            <h3 className="text-2xl font-black text-slate-900 mb-2">{type.title}</h3>
+                            <p className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">{type.desc}</p>
 
-                    {/* Main Content Card (Glass + Gradient) */}
-                    <div className="lg:w-2/3 w-full">
-                        <AnimatePresence mode="wait">
+                            <div className="mt-auto pt-4 border-t border-slate-100 flex items-center text-slate-500 font-medium group-hover:text-slate-900 transition-colors">
+                                Learn More <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                        </motion.button>
+                    ))}
+                </div>
+
+                <ScrollArrow targetId="calculator-section" />
+
+                {/* Modal for Details */}
+                <AnimatePresence>
+                    {selectedFireType && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                            onClick={() => setSelectedFireType(null)}
+                        >
                             <motion.div
-                                key={activeTab}
-                                initial={{ opacity: 0, x: 20, scale: 0.98 }}
-                                animate={{ opacity: 1, x: 0, scale: 1 }}
-                                exit={{ opacity: 0, x: -20, scale: 0.98 }}
-                                transition={{ duration: 0.4, ease: "easeOut" }}
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                onClick={(e) => e.stopPropagation()}
                                 className={`
-                                    relative overflow-hidden rounded-[2.5rem] p-8 md:p-12 shadow-2xl border border-white/50
-                                    bg-gradient-to-br ${fireTypes[activeTab].bgGradient}
+                                    relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] shadow-2xl
+                                    bg-gradient-to-br ${selectedFireType.bgGradient} border border-white/50
                                 `}
                             >
-                                {/* Background Watermark Icon */}
-                                <div className="absolute -bottom-10 -right-10 opacity-[0.07] transform rotate-12 scale-150">
-                                    {React.cloneElement(fireTypes[activeTab].icon, { size: 400, className: `text-black` })}
-                                </div>
+                                {/* Close Button */}
+                                <button
+                                    onClick={() => setSelectedFireType(null)}
+                                    className="absolute top-4 right-4 p-2 bg-white/50 hover:bg-white rounded-full transition-colors z-20 backdrop-blur-sm"
+                                >
+                                    <X className="w-6 h-6 text-slate-600" />
+                                </button>
 
-                                <div className="relative z-10">
-                                    {/* Header Section */}
-                                    <div className="flex items-start justify-between mb-8">
-                                        <div>
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-white/80 backdrop-blur text-${fireTypes[activeTab].color}-600 shadow-sm border border-${fireTypes[activeTab].color}-100`}>
-                                                    {fireTypes[activeTab].desc}
-                                                </div>
-                                            </div>
-                                            <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-2">
-                                                {fireTypes[activeTab].title}
-                                            </h3>
-                                            <p className={`text-xl font-medium italic text-${fireTypes[activeTab].color}-700 opacity-90`}>
-                                                "{fireTypes[activeTab].tagline}"
-                                            </p>
-                                        </div>
-                                        <div className={`hidden md:flex p-4 rounded-2xl bg-white/80 backdrop-blur shadow-lg text-${fireTypes[activeTab].color}-500 transform rotate-3`}>
-                                            {React.cloneElement(fireTypes[activeTab].icon, { size: 48 })}
-                                        </div>
+                                {/* Modal Content - Similar to previous Detail View */}
+                                <div className="p-8 md:p-10 relative overflow-hidden">
+                                    {/* Background Watermark */}
+                                    <div className="absolute -bottom-10 -right-10 opacity-[0.07] transform rotate-12 scale-150 pointer-events-none">
+                                        {React.cloneElement(selectedFireType.icon, { size: 300, className: `text-black` })}
                                     </div>
 
-                                    {/* Content Grid */}
-                                    <div className="space-y-8">
-
-                                        {/* Description */}
-                                        <div className="bg-white/60 backdrop-blur-md p-6 rounded-2xl border border-white/50 shadow-sm">
-                                            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                                <Zap className="w-4 h-4" /> What is it?
-                                            </h4>
-                                            <p className="text-lg md:text-xl text-slate-800 leading-relaxed font-medium">
-                                                {fireTypes[activeTab].detail}
-                                            </p>
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-white/80 backdrop-blur text-${selectedFireType.color}-600 shadow-sm border border-${selectedFireType.color}-100`}>
+                                                {selectedFireType.desc}
+                                            </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            {/* Target Card */}
-                                            <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden group">
-                                                <div className={`absolute top-0 right-0 w-32 h-32 bg-${fireTypes[activeTab].color}-500 blur-[50px] opacity-30 group-hover:opacity-50 transition-opacity`}></div>
-                                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">The Target</h4>
-                                                <div className="text-lg md:text-2xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 break-words leading-tight">
-                                                    {fireTypes[activeTab].corpus}
+                                        <h3 className="text-4xl font-black text-slate-900 tracking-tight mb-2">
+                                            {selectedFireType.title}
+                                        </h3>
+                                        <p className={`text-xl font-medium italic text-${selectedFireType.color}-700 opacity-90 mb-8`}>
+                                            "{selectedFireType.tagline}"
+                                        </p>
+
+                                        <div className="space-y-6">
+                                            <div className="bg-white/60 backdrop-blur-md p-6 rounded-2xl border border-white/50 shadow-sm">
+                                                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                    <Zap className="w-4 h-4" /> What is it?
+                                                </h4>
+                                                <p className="text-lg text-slate-800 leading-relaxed font-medium">
+                                                    {selectedFireType.detail}
+                                                </p>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="bg-slate-900 text-white p-5 rounded-2xl shadow-lg relative overflow-hidden">
+                                                    <div className={`absolute top-0 right-0 w-24 h-24 bg-${selectedFireType.color}-500 blur-[40px] opacity-40`}></div>
+                                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">The Target</h4>
+                                                    <div className="text-xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
+                                                        {selectedFireType.corpus}
+                                                    </div>
+                                                </div>
+
+                                                <div className="bg-white/60 backdrop-blur-md p-5 rounded-2xl border border-white/50 shadow-sm">
+                                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Real Example</h4>
+                                                    <p className="text-slate-700 italic text-sm leading-relaxed">
+                                                        "{selectedFireType.example}"
+                                                    </p>
                                                 </div>
                                             </div>
 
-                                            {/* Example Card */}
-                                            <div className="bg-white/60 backdrop-blur-md p-6 rounded-2xl border border-white/50 shadow-sm">
-                                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Real Example</h4>
-                                                <p className="text-slate-700 italic leading-relaxed text-sm">
-                                                    "{fireTypes[activeTab].example}"
-                                                </p>
+                                            <div className="pt-6 flex justify-end">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedFireType(null);
+                                                        document.getElementById('calculator-section')?.scrollIntoView({ behavior: 'smooth' });
+                                                    }}
+                                                    className={`
+                                                        group flex items-center gap-3 px-6 py-3 rounded-full font-bold text-lg shadow-xl transition-all transform hover:-translate-y-1
+                                                        bg-gradient-to-r ${selectedFireType.gradient} text-white w-full sm:w-auto justify-center
+                                                    `}
+                                                >
+                                                    Calculate {selectedFireType.title}
+                                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                                </button>
                                             </div>
-                                        </div>
-
-                                        {/* CTA */}
-                                        <div className="pt-8 flex justify-end">
-                                            <button
-                                                onClick={() => document.getElementById('calculator-section')?.scrollIntoView({ behavior: 'smooth' })}
-                                                className={`
-                                                    group flex items-center gap-3 px-8 py-4 rounded-full font-bold text-lg shadow-xl transition-all transform hover:-translate-y-1
-                                                    bg-gradient-to-r ${fireTypes[activeTab].gradient} text-white
-                                                `}
-                                            >
-                                                Calculate {fireTypes[activeTab].title}
-                                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             </motion.div>
-                        </AnimatePresence>
-                    </div>
-                </div>
-                <ScrollArrow targetId="calculator-section" />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </section>
     );
