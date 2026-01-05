@@ -4,7 +4,7 @@ import ScrollArrow from '../UI/ScrollArrow';
 
 const WhyFire = () => {
     return (
-        <section id="why-fire" className="py-12 bg-white">
+        <section id="why-fire" className="py-12 bg-white scroll-mt-28">
             <div className="max-w-7xl mx-auto px-6">
 
                 {/* Mobile Scroll Hint */}

@@ -5,7 +5,7 @@ import ScrollArrow from '../UI/ScrollArrow';
 
 const WhatIsFire = () => {
     return (
-        <section id="what-is-fire" className="py-20 bg-white relative overflow-hidden">
+        <section id="what-is-fire" className="py-20 bg-white relative overflow-hidden scroll-mt-28">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 {/* 1. HERO DEFINITION & ANIMATION */}
                 <div className="flex flex-col lg:flex-row items-stretch gap-8 lg:gap-16 mb-12">
@@ -157,7 +157,7 @@ const WhatIsFire = () => {
                     </div>
                 </div>
 
-                <ScrollArrow targetId="education-section" />
+                <ScrollArrow targetId="simple-math" />
             </div>
         </section>
     );

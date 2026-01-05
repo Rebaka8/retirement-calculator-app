@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 
-export const generateFireReport = (data, fireNumbers, mode = 'income') => {
+// Exported Helper to Create PDF Document
+export const createReportDoc = (data, fireNumbers, mode) => {
     const doc = new jsPDF();
     const date = new Date().toLocaleDateString();
 
@@ -156,5 +157,11 @@ export const generateFireReport = (data, fireNumbers, mode = 'income') => {
     doc.text("If anything in this report is not understood, please briefly go through the website.", 105, 280, { align: 'center' });
     doc.text("Thank you for using our website!", 105, 285, { align: 'center' });
 
+    return doc;
+};
+
+// -- EXPORTED FUNCTION 1: Download --
+export const generateFireReport = (data, fireNumbers, mode = 'income') => {
+    const doc = createReportDoc(data, fireNumbers, mode);
     doc.save("FIRE_Freedom_Plan.pdf");
 };

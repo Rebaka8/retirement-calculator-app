@@ -89,7 +89,7 @@ const FireTypes = () => {
     };
 
     return (
-        <section className="py-12 relative min-h-screen" id="fire-types">
+        <section className="py-12 relative min-h-screen scroll-mt-28" id="fire-types">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
                 {/* Header with Visual Pop */}
@@ -119,24 +119,24 @@ const FireTypes = () => {
                             whileHover={{ y: -5 }}
                             whileTap={{ scale: 0.98 }}
                             className={`
-                                relative overflow-hidden group text-left p-6 rounded-[2rem] border transition-all duration-300 h-full flex flex-col
+                                relative overflow-hidden group text-left p-5 rounded-[1.5rem] border transition-all duration-300 h-full flex flex-col
                                 bg-white hover:shadow-2xl hover:border-${type.color}-200 border-slate-100 shadow-sm
                             `}
                         >
                             {/* Colorful Gradient Blob Background */}
-                            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${type.gradient} opacity-10 blur-[40px] rounded-full group-hover:opacity-20 transition-opacity`} />
+                            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${type.gradient} opacity-10 blur-[30px] rounded-full group-hover:opacity-20 transition-opacity`} />
 
                             <div className={`
-                                w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-md
+                                w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-md
                                 bg-gradient-to-br ${type.gradient} text-white
                             `}>
                                 {type.icon}
                             </div>
 
-                            <h3 className="text-2xl font-black text-slate-900 mb-2">{type.title}</h3>
-                            <p className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">{type.desc}</p>
+                            <h3 className="text-xl font-black text-slate-900 mb-1">{type.title}</h3>
+                            <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">{type.desc}</p>
 
-                            <div className="mt-auto pt-4 border-t border-slate-100 flex items-center text-slate-500 font-medium group-hover:text-slate-900 transition-colors">
+                            <div className="mt-auto pt-3 border-t border-slate-100 flex items-center text-slate-500 text-sm font-medium group-hover:text-slate-900 transition-colors">
                                 Learn More <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                             </div>
                         </motion.button>
@@ -161,7 +161,7 @@ const FireTypes = () => {
                                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                                 onClick={(e) => e.stopPropagation()}
                                 className={`
-                                    relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] shadow-2xl
+                                    relative w-full max-w-xl max-h-[85vh] overflow-y-auto rounded-[2rem] shadow-2xl
                                     bg-gradient-to-br ${selectedFireType.bgGradient} border border-white/50
                                 `}
                             >
@@ -170,70 +170,70 @@ const FireTypes = () => {
                                     onClick={() => setSelectedFireType(null)}
                                     className="absolute top-4 right-4 p-2 bg-white/50 hover:bg-white rounded-full transition-colors z-20 backdrop-blur-sm"
                                 >
-                                    <X className="w-6 h-6 text-slate-600" />
+                                    <X className="w-5 h-5 text-slate-600" />
                                 </button>
 
                                 {/* Modal Content - Similar to previous Detail View */}
-                                <div className="p-8 md:p-10 relative overflow-hidden">
+                                <div className="p-6 md:p-8 relative overflow-hidden">
                                     {/* Background Watermark */}
-                                    <div className="absolute -bottom-10 -right-10 opacity-[0.07] transform rotate-12 scale-150 pointer-events-none">
-                                        {React.cloneElement(selectedFireType.icon, { size: 300, className: `text-black` })}
+                                    <div className="absolute -bottom-10 -right-10 opacity-[0.05] transform rotate-12 pointer-events-none">
+                                        {React.cloneElement(selectedFireType.icon, { size: 200, className: `text-black` })}
                                     </div>
 
                                     <div className="relative z-10">
                                         <div className="flex items-center gap-3 mb-2">
-                                            <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-white/80 backdrop-blur text-${selectedFireType.color}-600 shadow-sm border border-${selectedFireType.color}-100`}>
+                                            <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-white/80 backdrop-blur text-${selectedFireType.color}-600 shadow-sm border border-${selectedFireType.color}-100`}>
                                                 {selectedFireType.desc}
                                             </div>
                                         </div>
 
-                                        <h3 className="text-4xl font-black text-slate-900 tracking-tight mb-2">
+                                        <h3 className="text-3xl font-black text-slate-900 tracking-tight mb-1">
                                             {selectedFireType.title}
                                         </h3>
-                                        <p className={`text-xl font-medium italic text-${selectedFireType.color}-700 opacity-90 mb-8`}>
+                                        <p className={`text-lg font-medium italic text-${selectedFireType.color}-700 opacity-90 mb-6`}>
                                             "{selectedFireType.tagline}"
                                         </p>
 
-                                        <div className="space-y-6">
-                                            <div className="bg-white/60 backdrop-blur-md p-6 rounded-2xl border border-white/50 shadow-sm">
-                                                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                                    <Zap className="w-4 h-4" /> What is it?
+                                        <div className="space-y-5">
+                                            <div className="bg-white/60 backdrop-blur-md p-5 rounded-2xl border border-white/50 shadow-sm">
+                                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                    <Zap className="w-3 h-3" /> What is it?
                                                 </h4>
-                                                <p className="text-lg text-slate-800 leading-relaxed font-medium">
+                                                <p className="text-base text-slate-800 leading-relaxed font-medium">
                                                     {selectedFireType.detail}
                                                 </p>
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="bg-slate-900 text-white p-5 rounded-2xl shadow-lg relative overflow-hidden">
+                                                <div className="bg-slate-900 text-white p-4 rounded-xl shadow-lg relative overflow-hidden">
                                                     <div className={`absolute top-0 right-0 w-24 h-24 bg-${selectedFireType.color}-500 blur-[40px] opacity-40`}></div>
-                                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">The Target</h4>
-                                                    <div className="text-xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
+                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">The Target</h4>
+                                                    <div className="text-lg font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
                                                         {selectedFireType.corpus}
                                                     </div>
                                                 </div>
 
-                                                <div className="bg-white/60 backdrop-blur-md p-5 rounded-2xl border border-white/50 shadow-sm">
-                                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Real Example</h4>
-                                                    <p className="text-slate-700 italic text-sm leading-relaxed">
+                                                <div className="bg-white/60 backdrop-blur-md p-4 rounded-xl border border-white/50 shadow-sm">
+                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Real Example</h4>
+                                                    <p className="text-slate-700 italic text-xs leading-relaxed">
                                                         "{selectedFireType.example}"
                                                     </p>
                                                 </div>
                                             </div>
 
-                                            <div className="pt-6 flex justify-end">
+                                            <div className="pt-4 flex justify-end">
                                                 <button
                                                     onClick={() => {
                                                         setSelectedFireType(null);
                                                         document.getElementById('calculator-section')?.scrollIntoView({ behavior: 'smooth' });
                                                     }}
                                                     className={`
-                                                        group flex items-center gap-3 px-6 py-3 rounded-full font-bold text-lg shadow-xl transition-all transform hover:-translate-y-1
+                                                        group flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-base shadow-xl transition-all transform hover:-translate-y-1
                                                         bg-gradient-to-r ${selectedFireType.gradient} text-white w-full sm:w-auto justify-center
                                                     `}
                                                 >
                                                     Calculate {selectedFireType.title}
-                                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                                 </button>
                                             </div>
                                         </div>

@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFire } from '../../context/FireContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Share2, RefreshCw, TrendingUp, Zap, AlertTriangle, CheckCircle, Target, Wallet } from 'lucide-react';
-import { generateFireReport } from '../Report/DownloadReport';
+import { Download, RefreshCw, TrendingUp, Zap, AlertTriangle, CheckCircle, Target, Wallet, FileText } from 'lucide-react';
+import { generateFireReport, createReportDoc } from '../Report/DownloadReport';
 import Tooltip from '../UI/Tooltip';
+import ScrollArrow from '../UI/ScrollArrow';
+
+
 
 const InputPair = ({ label, value, min, max, step, onChange, color = "blue", suffix = "", tooltip }) => (
     <div>
@@ -41,8 +44,11 @@ const FireWidget = () => {
         resetData
     } = useFire();
 
-    const [mode, setMode] = useState('income'); // 'income' or 'goal'
-    const [copied, setCopied] = useState(false);
+    const [mode, setMode] = useState(() => {
+        const p = new URLSearchParams(window.location.search);
+        return p.get('mode') === 'goal' ? 'goal' : 'income';
+    });
+
 
     // Initial Loading Guard
     if (!data || !fireNumbers) return <div className="p-12 text-center text-slate-400">Loading Calculator...</div>;
@@ -74,26 +80,88 @@ const FireWidget = () => {
         // ... include others as needed
     };
 
-    const handleCopy = () => {
-        const type = mode === 'income' ? 'Income' : 'Goal';
-        const summary = `My FIRE Plan (${type}):\nTarget: ₹${formatCurrency(mode === 'income' ? fireNumbers.traditional : data.targetCorpus)}\nYears Left: ${mode === 'income' ? fireResults.traditional.years : data.yearsToRetire}`;
-        navigator.clipboard.writeText(summary);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
     // Helper: Input Field Pair Moved Outside
 
 
+    // Check for Shared Report View
+    const params = new URLSearchParams(window.location.search);
+    const isReportView = params.get('view') === 'report';
+    const [pdfUrl, setPdfUrl] = useState(null);
+
+    // Auto-Generate PDF for Report View
+    useEffect(() => {
+        if (isReportView && data && fireNumbers && !pdfUrl) {
+            const generate = async () => {
+                // Short delay to ensure fonts/data loaded?
+                await new Promise(r => setTimeout(r, 500));
+                const doc = createReportDoc(data, fireNumbers, mode);
+                const blob = doc.output('bloburl');
+                setPdfUrl(blob);
+            };
+            generate();
+        }
+    }, [isReportView, data, fireNumbers, mode]);
+
+    if (isReportView && data && fireNumbers) {
+        if (!pdfUrl) {
+            return (
+                <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-50">
+                    <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4" />
+                    <h2 className="text-xl font-bold text-slate-700">Generating Report...</h2>
+                </div>
+            );
+        }
+
+        return (
+            <div className="h-screen w-full bg-slate-100 flex flex-col relative">
+                {/* PDF Viewer */}
+                <iframe src={pdfUrl} className="flex-1 w-full h-full" title="FIRE Report" />
+
+                {/* Floating Action Bar */}
+                <div className="absolute top-4 right-4 flex gap-2">
+                    <button
+                        onClick={() => {
+                            const doc = createReportDoc(data, fireNumbers, mode);
+                            doc.save("FIRE_Freedom_Plan.pdf");
+                        }}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95 flex items-center gap-2"
+                        title="Download PDF"
+                    >
+                        <Download className="w-5 h-5" />
+                        <span className="hidden sm:inline font-bold pr-2">Download</span>
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            const url = new URL(window.location);
+                            url.searchParams.delete('view');
+                            window.history.pushState({}, '', url);
+                            window.location.reload();
+                        }}
+                        className="bg-white hover:bg-slate-100 text-slate-700 p-3 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95"
+                        title="Edit Plan"
+                    >
+                        <RefreshCw className="w-5 h-5" />
+                    </button>
+                </div>
+
+                {/* Mobile Fallback Hint (Overlay at bottom if needed) */}
+                <div className="sm:hidden absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur p-3 rounded-xl shadow-lg text-center text-xs text-slate-500">
+                    If PDF doesn't appear, click <b>Download</b> above.
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <section className="py-12 bg-white" id="calculator-section">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <section className="py-8 bg-white">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
                 {/* Header & Reset */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
                     <div>
-                        <h2 className="text-3xl font-black text-slate-800 tracking-tight">Your Freedom Planner</h2>
-                        <p className="text-slate-500 font-medium">Map out your path to independence.</p>
+                        <h2 className="text-2xl font-black text-slate-800 tracking-tight">Your Freedom Planner</h2>
+                        <p className="text-slate-500 font-medium text-sm">Map out your path to independence.</p>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -101,32 +169,32 @@ const FireWidget = () => {
                         <div className="flex items-center bg-slate-100 p-1 rounded-xl">
                             <button
                                 onClick={() => setMode('income')}
-                                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${mode === 'income' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === 'income' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >
-                                <Wallet className="w-4 h-4 inline mr-2" />
+                                <Wallet className="w-3 h-3 inline mr-2" />
                                 By Income
                             </button>
                             <button
                                 onClick={() => setMode('goal')}
-                                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${mode === 'goal' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${mode === 'goal' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >
-                                <Target className="w-4 h-4 inline mr-2" />
+                                <Target className="w-3 h-3 inline mr-2" />
                                 By Goal
                             </button>
                         </div>
 
-                        <button onClick={resetData} className="text-sm text-slate-400 hover:text-red-500 flex items-center gap-1 transition-colors">
+                        <button onClick={resetData} className="text-xs text-slate-400 hover:text-red-500 flex items-center gap-1 transition-colors">
                             <RefreshCw className="w-3 h-3" /> Reset
                         </button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
 
                     {/* LEFT COLUMN: Inputs (Span 5) */}
-                    <div className="lg:col-span-5 space-y-6">
+                    <div className="lg:col-span-5 space-y-5">
 
-                        <div className="bg-slate-50 p-6 md:p-8 rounded-[2rem] border border-slate-100 shadow-inner space-y-8">
+                        <div className="bg-slate-50 p-5 md:p-6 rounded-[2rem] border border-slate-100 shadow-inner space-y-5">
 
                             {/* DYNAMIC INPUTS BASED ON MODE */}
                             {mode === 'income' ? (
@@ -181,7 +249,7 @@ const FireWidget = () => {
                             <hr className="border-slate-200 border-dashed" />
 
                             {/* GLOBAL ASSUMPTIONS (Visible in both modes) */}
-                            <div className="space-y-6">
+                            <div className="space-y-5">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center">
                                     Global Settings
                                     <Tooltip text="Assumptions used to project your future wealth." />
@@ -197,7 +265,7 @@ const FireWidget = () => {
                                             type="number"
                                             value={data.currentCorpus || 0}
                                             onChange={(e) => updateData('currentCorpus', Number(e.target.value))}
-                                            className="w-36 bg-white border border-slate-200 rounded-lg text-right px-3 py-2 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-slate-400 transition-all"
+                                            className="w-32 bg-white border border-slate-200 rounded-lg text-right px-2 py-1.5 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-slate-400 transition-all"
                                         />
                                     </div>
                                     <input
@@ -218,7 +286,7 @@ const FireWidget = () => {
                                             type="number"
                                             value={data.investmentReturnRate}
                                             onChange={(e) => updateData('investmentReturnRate', Number(e.target.value))}
-                                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-3 text-sm font-bold text-emerald-600 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
+                                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-emerald-600 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
                                         />
                                     </div>
                                     <div>
@@ -230,7 +298,7 @@ const FireWidget = () => {
                                             type="number"
                                             value={data.inflationRate}
                                             onChange={(e) => updateData('inflationRate', Number(e.target.value))}
-                                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-3 text-sm font-bold text-rose-600 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all"
+                                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-rose-600 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all"
                                         />
                                     </div>
                                 </div>
@@ -239,30 +307,30 @@ const FireWidget = () => {
                     </div>
 
                     {/* RIGHT COLUMN: Results (Span 7) */}
-                    <div className="lg:col-span-7 flex flex-col h-full space-y-6">
+                    <div className="lg:col-span-7 flex flex-col h-full space-y-5">
 
                         {/* DYNAMIC SUMMARY BLOCK */}
-                        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-2xl">
+                        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-5 md:p-6 text-white relative overflow-hidden shadow-2xl">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
                             {mode === 'income' ? (
                                 <div className="relative z-10">
-                                    <h3 className="text-white/60 font-bold uppercase tracking-wider text-sm mb-2">Your Reality</h3>
-                                    <div className="text-3xl md:text-4xl font-bold mb-4">
+                                    <h3 className="text-white/60 font-bold uppercase tracking-wider text-xs mb-2">Your Reality</h3>
+                                    <div className="text-3xl md:text-4xl font-bold mb-3">
                                         You verify <span className="text-emerald-400">{savingsRate.toFixed(0)}%</span> of your future.
                                     </div>
-                                    <p className="text-white/80 leading-relaxed max-w-lg">
+                                    <p className="text-white/80 leading-relaxed max-w-lg text-sm">
                                         At this rate, you'll hit Traditional FIRE in <span className="text-white font-bold decoration-2 underline decoration-indigo-400 underline-offset-4">{fireResults.traditional.years} years</span>.
                                         Want it faster? Bumping savings to {Math.min(savingsRate + 10, 80).toFixed(0)}% saves you {(parseInt(fireResults.traditional.years) * 0.3).toFixed(1)} years.
                                     </p>
                                 </div>
                             ) : (
                                 <div className="relative z-10">
-                                    <h3 className="text-white/60 font-bold uppercase tracking-wider text-sm mb-2">Your Dream Plan</h3>
-                                    <div className="text-3xl md:text-4xl font-bold mb-4">
+                                    <h3 className="text-white/60 font-bold uppercase tracking-wider text-xs mb-2">Your Dream Plan</h3>
+                                    <div className="text-3xl md:text-4xl font-bold mb-3">
                                         Need <span className="text-purple-400">{formatCurrency(monthlySavings)}</span> / month
                                     </div>
-                                    <p className="text-white/80 leading-relaxed max-w-lg">
+                                    <p className="text-white/80 leading-relaxed max-w-lg text-sm">
                                         To reach {formatCurrency(data.targetCorpus)} in {data.yearsToRetire} years, aim for an annual income of approx <span className="text-white font-bold decoration-2 underline decoration-purple-400 underline-offset-4">{formatCurrency(requiredAnnualIncome)}</span> (assuming 40% savings).
                                     </p>
                                 </div>
@@ -302,14 +370,14 @@ const FireWidget = () => {
 
                                 return (
                                     <div key={key} className={`bg-white border border-slate-100 p-3 rounded-xl shadow-sm relative overflow-hidden group hover:border-${colorMap[key]}-200 transition-colors`}>
-                                        <div className={`absolute top-0 left-0 w-1 h-full bg-${colorMap[key] || 'gray'}-500`} />
+                                        <div className={`absolute top-0 left-0 w-1 h-full bg-blue-500`} />
                                         <div className="pl-2 h-full flex flex-col justify-between">
                                             <div>
                                                 <div className="text-[10px] font-bold text-slate-400 uppercase">{key} FIRE</div>
-                                                <div className="font-bold text-slate-800 text-lg">{corpus} Cr</div>
+                                                <div className="font-bold text-slate-800 text-xl">{corpus} Cr</div>
                                             </div>
                                             <div className="mt-2">
-                                                <span className={`text-sm font-extrabold text-${colorMap[key]}-600 bg-${colorMap[key]}-50 px-2 py-0.5 rounded`}>
+                                                <span className={`text-xs font-extrabold text-${colorMap[key]}-600 bg-${colorMap[key]}-50 px-2 py-0.5 rounded`}>
                                                     {years} Years
                                                 </span>
                                             </div>
@@ -319,21 +387,12 @@ const FireWidget = () => {
                             })}
                         </div>
 
-                        {/* ACTION BUTTONS */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                onClick={handleCopy}
-                                className="flex items-center justify-center gap-2 px-6 py-4 bg-white border border-slate-200 hover:border-blue-300 text-slate-600 font-bold rounded-xl transition-all"
-                            >
-                                {copied ? <CheckCircle className="w-5 h-5 text-green-500" /> : <Share2 className="w-5 h-5" />}
-                                {copied ? "Copied" : "Share"}
-                            </button>
-
+                        <div className="mt-4">
                             <button
                                 onClick={() => generateFireReport(data, fireNumbers, mode)}
-                                className="flex items-center justify-center gap-2 px-6 py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-200 transition-all hover:-translate-y-1"
+                                className="w-full flex items-center justify-center gap-2 px-5 py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-200 transition-all hover:-translate-y-1 text-sm"
                             >
-                                <Download className="w-5 h-5" />
+                                <Download className="w-4 h-4" />
                                 Download Plan
                             </button>
                         </div>
@@ -342,7 +401,10 @@ const FireWidget = () => {
 
                 {/* GRAPH REMOVED AS PER USER REQUEST */}
 
+                <ScrollArrow targetId="simple-truths" />
             </div>
+
+
         </section>
     );
 };

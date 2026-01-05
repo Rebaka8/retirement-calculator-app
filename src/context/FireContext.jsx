@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
 const FireContext = createContext();
 
@@ -9,70 +9,69 @@ const INITIAL_DATA = {
     currentCorpus: 0, // Using currentCorpus instead of currentNetWorth for consistency
     annualIncome: 1500000,
     annualExpenses: 800000,
-    investmentReturnRate: 10.0, // percentage
-    inflationRate: 6.0, // percentage
+    investmentReturnRate: 6.0, // percentage
+    inflationRate: 3.0, // percentage
     targetCorpus: 50000000, // 5 Cr default for Goal Mode
     yearsToRetire: 15 // for Goal Mode
 };
 
 export const FireProvider = ({ children }) => {
     const [data, setData] = useState(() => {
+        // 1. Check URL Params (Permalink)
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('inc')) {
+            return {
+                age: Number(params.get('age')) || 30,
+                currentCorpus: Number(params.get('cur')) || 0,
+                annualIncome: Number(params.get('inc')) || 0,
+                annualExpenses: Number(params.get('exp')) || 0,
+                investmentReturnRate: Number(params.get('ret')) || 6.0,
+                inflationRate: Number(params.get('inf')) || 3.0,
+                targetCorpus: Number(params.get('tar')) || 50000000,
+                yearsToRetire: Number(params.get('yrs')) || 15
+            };
+        }
+
+        // 2. Local Storage
         const saved = localStorage.getItem('fire_data');
         return saved ? JSON.parse(saved) : INITIAL_DATA;
     });
 
-    const [fireNumbers, setFireNumbers] = useState({});
-
-    useEffect(() => {
-        localStorage.setItem('fire_data', JSON.stringify(data));
-        calculateAllFire(data);
-    }, [data]);
-
-    const updateData = (field, value) => {
-        setData(prev => ({ ...prev, [field]: value }));
-    };
-
-    const calculateAllFire = (input) => {
-        const expenses = parseFloat(input.annualExpenses) || 0;
-        // Standard Withdrawal Rate of 4% usually implies 25x expenses
+    const fireNumbers = useMemo(() => {
+        const expenses = parseFloat(data.annualExpenses) || 0;
         const multiplier = 25;
 
-        // 1. Traditional FIRE
         const normalFire = expenses * multiplier;
-
-        // 2. Lean FIRE (Expenses ~70% of normal)
         const leanFire = (expenses * 0.7) * multiplier;
-
-        // 3. Fat FIRE (Expenses ~200% of normal)
         const fatExpenses = expenses * 2;
         const fatFire = fatExpenses * multiplier;
-
-        // 4. Barista FIRE (Need 50% corpus, side job covers rest)
         const baristaFire = normalFire * 0.5;
 
-        // 5. Coast FIRE
-        // Corpus needed NOW to grow to NormalFire in (60 - Age) years
-        // Formula: Target / (1 + r)^n
-        const yearsTo60 = Math.max(0, 60 - (input.age || 30));
-        // Real rate = Return - Inflation (approx)
-        const realRate = (input.investmentReturnRate - input.inflationRate) / 100;
-        const effectiveRate = realRate > 0 ? realRate : 0.001; // Avoid divide by zero
-
+        // Coast FIRE
+        const yearsTo60 = Math.max(0, 60 - (data.age || 30));
+        const realRate = (data.investmentReturnRate - data.inflationRate) / 100;
+        const effectiveRate = realRate > 0 ? realRate : 0.001;
         const coastFire = normalFire / Math.pow(1 + effectiveRate, yearsTo60);
 
-        // 6. Slow FIRE
-        // Same target, just slower index. We'll use the Normal Target.
         const slowFire = normalFire;
 
-        setFireNumbers({
+        return {
             lean: leanFire,
             fat: fatFire,
             barista: baristaFire,
             coast: coastFire,
             slow: slowFire,
             traditional: normalFire
-        });
+        };
+    }, [data]);
+
+    const updateData = (field, value) => {
+        setData(prev => ({ ...prev, [field]: value }));
     };
+
+    useEffect(() => {
+        localStorage.setItem('fire_data', JSON.stringify(data));
+    }, [data]);
 
     const calculateYearsToTarget = (target, currentData, savingsOverride = null) => {
         if (!currentData || !target) return '∞';
@@ -88,10 +87,10 @@ export const FireProvider = ({ children }) => {
             savings = annualIncome - annualExpenses;
         }
 
-        const returnRate = (parseFloat(currentData.investmentReturnRate) || 8) / 100;
+        const returnRate = (parseFloat(currentData.investmentReturnRate) || 6) / 100;
         // We use nominal return for corpus growth usually, but inflation adjusts the Target. 
         // For simplicity in this display, let's use Real Return to see "Purchasing Power" parity years.
-        const inflation = (parseFloat(currentData.inflationRate) || 6) / 100;
+        const inflation = (parseFloat(currentData.inflationRate) || 3) / 100;
         const realReturn = ((1 + returnRate) / (1 + inflation)) - 1;
 
         if (savings <= 0 && netWorth < target) return '∞'; // Changed condition to allow coasting if NetWorth > Target
@@ -132,8 +131,8 @@ export const FireProvider = ({ children }) => {
         const years = parseFloat(data.yearsToRetire) || 15;
         const current = parseFloat(data.currentCorpus) || 0;
 
-        const r = (parseFloat(data.investmentReturnRate) || 10) / 100;
-        const i = (parseFloat(data.inflationRate) || 6) / 100;
+        const r = (parseFloat(data.investmentReturnRate) || 6) / 100;
+        const i = (parseFloat(data.inflationRate) || 3) / 100;
         const realRate = ((1 + r) / (1 + i)) - 1; // Real Rate
 
         // FV formula: FV = PV*(1+r)^n + PMT * [((1+r)^n - 1) / r]

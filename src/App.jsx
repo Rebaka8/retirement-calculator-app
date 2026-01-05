@@ -3,7 +3,8 @@ import LegalModal from './components/LegalModal';
 import { Github, Linkedin } from 'lucide-react';
 import { FireProvider } from './context/FireContext';
 import Hero from './components/Landing/Hero';
-import Education from './components/Landing/Education';
+import SimpleTruths from './components/Landing/SimpleTruths';
+import RealLifeImpacts from './components/Landing/RealLifeImpacts';
 import WhatIsFire from './components/Landing/WhatIsFire';
 import SimpleMath from './components/Landing/SimpleMath';
 import WhyFire from './components/Landing/WhyFire';
@@ -30,7 +31,7 @@ const MainLayout = () => {
       <p className="mb-4">We may use local storage cookies to save your preferences or input data so you don't have to re-enter it every time you visit. You can clear this data at any time by clearing your browser cache.</p>
 
       <h4 className="font-bold text-slate-900 mt-6 mb-2">3. Third-Party Services</h4>
-      <p className="mb-4">We may use third-party libraries for analytics or UI components (like fonts and icons) which may collect anonymous usage data.</p>
+      <p className="mb-4">We use tools made by other companies to make our website look good and understand how people use it. These tools may collect basic, anonymous information, but not personal details.</p>
     </>
   );
 
@@ -84,7 +85,7 @@ const MainLayout = () => {
 
         <WhatIsFire />
 
-        <Education />
+
 
         <SimpleMath />
 
@@ -92,9 +93,13 @@ const MainLayout = () => {
 
         <FireTypes />
 
-        <div ref={calculatorRef} className="relative min-h-[400px]">
+        <div ref={calculatorRef} id="calculator-section" className="relative min-h-[400px] scroll-mt-24">
           <FireWidget />
         </div>
+
+        <SimpleTruths />
+
+        <RealLifeImpacts />
 
         <FAQ />
       </main>

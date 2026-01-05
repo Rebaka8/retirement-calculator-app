@@ -3,7 +3,7 @@ import ScrollArrow from '../UI/ScrollArrow';
 
 const SimpleMath = () => {
     return (
-        <section id="simple-math" className="py-12 bg-white">
+        <section id="simple-math" className="py-12 bg-white scroll-mt-28">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="bg-white border border-slate-200 rounded-3xl p-8 lg:p-12 shadow-sm text-center max-w-4xl mx-auto">
                     <h3 className="text-2xl font-bold text-slate-900 mb-8">How is it calculated?</h3>
