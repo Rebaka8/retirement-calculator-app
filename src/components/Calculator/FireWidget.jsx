@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFire } from '../../context/FireContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, RefreshCw, TrendingUp, Zap, AlertTriangle, CheckCircle, Target, Wallet, FileText } from 'lucide-react';
+import { Download, RefreshCw, TrendingUp, Zap, AlertTriangle, CheckCircle, Target, Wallet, FileText, Share2, X, Link, Mail, MessageCircle } from 'lucide-react';
 import { generateFireReport, createReportDoc } from '../Report/DownloadReport';
 import Tooltip from '../UI/Tooltip';
 import ScrollArrow from '../UI/ScrollArrow';
@@ -87,6 +87,7 @@ const FireWidget = () => {
     const params = new URLSearchParams(window.location.search);
     const isReportView = params.get('view') === 'report';
     const [pdfUrl, setPdfUrl] = useState(null);
+    const [showShareFallback, setShowShareFallback] = useState(false);
 
     // Auto-Generate PDF for Report View
     useEffect(() => {
@@ -153,8 +154,94 @@ const FireWidget = () => {
         );
     }
 
+    const handleShare = async () => {
+        try {
+            const doc = createReportDoc(data, fireNumbers, mode);
+            const blob = doc.output('blob');
+            const file = new File([blob], "FIRE_Freedom_Plan.pdf", { type: "application/pdf" });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: 'My FIRE Freedom Plan',
+                    text: 'Here is my personalized FIRE path report!',
+                });
+            } else {
+                setShowShareFallback(true);
+            }
+        } catch (error) {
+            console.error("Error sharing:", error);
+            setShowShareFallback(true); // Fallback if user cancels or API fails
+        }
+    };
+
     return (
-        <section className="py-8 bg-white">
+        <section className="py-8 bg-white relative">
+            {/* Share Fallback Modal */}
+            <AnimatePresence>
+                {showShareFallback && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                        onClick={() => setShowShareFallback(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold text-slate-800">Share Report</h3>
+                                <button onClick={() => setShowShareFallback(false)} className="p-1 hover:bg-slate-100 rounded-full">
+                                    <X className="w-5 h-5 text-slate-500" />
+                                </button>
+                            </div>
+
+                            <p className="text-sm text-slate-500 mb-6">
+                                Your browser doesn't support direct file sharing. You can share the link to this calculator instead!
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <a
+                                    href={`https://wa.me/?text=Check%20out%20this%20FIRE%20Calculator!%20${encodeURIComponent(window.location.href)}`}
+                                    target="_blank" rel="noopener noreferrer"
+                                    className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-200 hover:bg-emerald-50 hover:border-emerald-200 transition-colors group"
+                                >
+                                    <MessageCircle className="w-6 h-6 text-emerald-500 group-hover:scale-110 transition-transform" />
+                                    <span className="text-xs font-bold text-slate-600">WhatsApp</span>
+                                </a>
+
+                                <a
+                                    href={`mailto:?subject=Check%20out%20this%20FIRE%20Calculator&body=Here%20is%20a%20great%20tool%20to%20plan%20your%20financial%20independence:%20${encodeURIComponent(window.location.href)}`}
+                                    className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-200 hover:bg-blue-50 hover:border-blue-200 transition-colors group"
+                                >
+                                    <Mail className="w-6 h-6 text-blue-500 group-hover:scale-110 transition-transform" />
+                                    <span className="text-xs font-bold text-slate-600">Email</span>
+                                </a>
+
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(window.location.href);
+                                        setCopied(true);
+                                        setTimeout(() => setCopied(false), 2000);
+                                    }}
+                                    className={`col-span-2 flex items-center justify-center gap-2 p-3 rounded-xl border transition-colors ${copied ? 'bg-slate-800 text-white border-slate-800' : 'border-slate-200 hover:bg-slate-50'}`}
+                                >
+                                    {copied ? <CheckCircle className="w-4 h-4" /> : <Link className="w-4 h-4 text-slate-500" />}
+                                    <span className={`text-xs font-bold ${copied ? 'text-white' : 'text-slate-600'}`}>
+                                        {copied ? 'Copied Link!' : 'Copy Link'}
+                                    </span>
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
                 {/* Header & Reset */}
@@ -387,13 +474,21 @@ const FireWidget = () => {
                             })}
                         </div>
 
-                        <div className="mt-4">
+                        <div className="mt-4 flex gap-3">
+                            <button
+                                onClick={handleShare}
+                                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-white border-2 border-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:border-slate-200 transition-all active:scale-95 text-sm"
+                            >
+                                <Share2 className="w-4 h-4" />
+                                Share
+                            </button>
+
                             <button
                                 onClick={() => generateFireReport(data, fireNumbers, mode)}
-                                className="w-full flex items-center justify-center gap-2 px-5 py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-200 transition-all hover:-translate-y-1 text-sm"
+                                className="flex-[2] flex items-center justify-center gap-2 px-5 py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-200 transition-all hover:-translate-y-1 active:scale-95 text-sm"
                             >
                                 <Download className="w-4 h-4" />
-                                Download Plan
+                                Download Report
                             </button>
                         </div>
                     </div>
