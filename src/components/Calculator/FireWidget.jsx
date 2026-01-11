@@ -180,7 +180,7 @@ const FireWidget = () => {
 
             if (isMobile) {
                 // Mobile: Bypass Modal, trigger native share immediately
-                await executeShare('native', blob);
+                await executeShare('native', blob, true); // Suppress toast on mobile
             } else {
                 // Desktop: Show Modal
                 setShowShareModal(true);
@@ -193,7 +193,7 @@ const FireWidget = () => {
         }
     };
 
-    const executeShare = async (platform, directBlob = null) => {
+    const executeShare = async (platform, directBlob = null, suppressToast = false) => {
         const blobToUse = directBlob || shareBlob;
         if (!blobToUse) return;
         setIsSharing(true);
@@ -230,8 +230,10 @@ const FireWidget = () => {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                 }
-                setToastMsg(result.message);
-                setTimeout(() => setToastMsg(null), 4000);
+                if (!suppressToast && result.message) {
+                    setToastMsg(result.message);
+                    setTimeout(() => setToastMsg(null), 4000);
+                }
             } else {
                 // Fallback for Copy Link on Mobile (Async Clipboard Blocked)
                 if (platform === 'copy' && result.error === 'clipboard_failed') {

@@ -101,7 +101,7 @@ const shareViaWhatsApp = (link, pdfBlob, popupWindow = null) => {
 
     const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
 
-    // If mobile and we are trying to share file natively
+    // If mobile AND supports file sharing, try Native Share (Files)
     if (isMobile && navigator.share && navigator.canShare) {
         const file = new File([pdfBlob], 'FIRE-Freedom-Plan.pdf', {
             type: 'application/pdf'
@@ -111,13 +111,15 @@ const shareViaWhatsApp = (link, pdfBlob, popupWindow = null) => {
             if (popupWindow) popupWindow.close(); // Close if we used native share
             navigator.share({
                 files: [file],
-                title: '📊 FIRE Freedom Plan'
+                title: 'FIRE Freedom Plan'
             }).catch(() => { });
             return { success: true };
         }
     }
 
-    const url = `https://api.whatsapp.com/send?text=${message}`;
+    // Fallback for Desktop: Use the generated Cloudinary Link
+    const textMessage = encodeURIComponent(link);
+    const url = `https://api.whatsapp.com/send?text=${textMessage}`;
 
     if (popupWindow) {
         popupWindow.location.href = url;
@@ -179,11 +181,13 @@ export const handleShareReport = async (pdfBlob, reportData, platform = 'copy', 
         let uploadResult = null;
         let shareLink = '';
 
-        if (platform !== 'download') {
+        if (platform === 'copy' || platform === 'whatsapp') {
+            // Upload to Cloudinary for "Copy Link" AND "WhatsApp" (Desktop)
+            // This is required to share the "report" via WhatsApp Web without forcing a download.
             uploadResult = await uploadToCloudinary(pdfBlob);
 
             if (!uploadResult.success) {
-                if (popupWindow) popupWindow.close(); // Close if upload fails
+                if (popupWindow) popupWindow.close();
                 return {
                     success: false,
                     message: uploadResult.error,
@@ -192,7 +196,6 @@ export const handleShareReport = async (pdfBlob, reportData, platform = 'copy', 
             }
 
             // Generate Preview Link
-            // User requested .jpg extension in the link
             const cloudinaryUrl = uploadResult.url.replace(/\.pdf$/i, '.jpg');
             shareLink = `${window.location.origin}/report/preview?file=${encodeURIComponent(cloudinaryUrl)}`;
         }
