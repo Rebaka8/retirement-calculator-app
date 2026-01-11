@@ -161,9 +161,10 @@ const FireTypes = () => {
                                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                                 onClick={(e) => e.stopPropagation()}
                                 className={`
-                                    relative w-full max-w-xl max-h-[85vh] flex flex-col rounded-[2rem] shadow-2xl
+                                    relative w-[90%] max-w-xl max-h-[75vh] flex flex-col rounded-[2rem] shadow-2xl
                                     bg-gradient-to-br ${selectedFireType.bgGradient} border border-white/50
                                     [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
+                                    my-auto mx-auto
                                 `}
                             >
                                 {/* Fixed Close Button Header */}

@@ -92,14 +92,12 @@ const copyLinkToClipboard = async (link) => {
 
         return { success: true, message: '✅ Link copied!' };
     } catch {
-        return { success: false, message: link, link };
+        return { success: false, error: 'clipboard_failed', link };
     }
 };
 
 const shareViaWhatsApp = (link, pdfBlob, popupWindow = null) => {
-    const message = encodeURIComponent(
-        `📊 My FIRE Freedom Plan Report\n\nView / Download:\n${link}`
-    );
+    const message = encodeURIComponent(link);
 
     const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
 
@@ -146,7 +144,7 @@ const shareViaNative = async (link, pdfBlob) => {
             });
         } else {
             await navigator.share({
-                title: '📊 FIRE Freedom Plan',
+                title: 'FIRE Report',
                 url: link
             });
         }

@@ -174,8 +174,17 @@ const FireWidget = () => {
         try {
             // Generate PDF Blob (NEW way!)
             const blob = getFireReportBlob(data, fireNumbers, mode);
-            setShareBlob(blob);
-            setShowShareModal(true);
+            setShareBlob(blob); // Still set state for desktop modal consistency
+
+            const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+            if (isMobile) {
+                // Mobile: Bypass Modal, trigger native share immediately
+                await executeShare('native', blob);
+            } else {
+                // Desktop: Show Modal
+                setShowShareModal(true);
+            }
         } catch (error) {
             console.error("Error generating share blob:", error);
             alert("Could not generate report for sharing.");
@@ -184,8 +193,9 @@ const FireWidget = () => {
         }
     };
 
-    const executeShare = async (platform) => {
-        if (!shareBlob) return;
+    const executeShare = async (platform, directBlob = null) => {
+        const blobToUse = directBlob || shareBlob;
+        if (!blobToUse) return;
         setIsSharing(true);
 
         try {
@@ -197,7 +207,7 @@ const FireWidget = () => {
             };
 
             if (platform === 'download') {
-                downloadPDF(shareBlob);
+                downloadPDF(blobToUse);
                 setToastMsg("✅ Download started!");
                 setTimeout(() => setToastMsg(null), 3000);
                 setIsSharing(false);
@@ -213,7 +223,7 @@ const FireWidget = () => {
                 }
             }
 
-            const result = await handleShareReport(shareBlob, reportData, platform, popupWindow);
+            const result = await handleShareReport(blobToUse, reportData, platform, popupWindow);
 
             if (result.success) {
                 if (platform === 'copy' || platform === 'copy-text') {
@@ -223,7 +233,14 @@ const FireWidget = () => {
                 setToastMsg(result.message);
                 setTimeout(() => setToastMsg(null), 4000);
             } else {
-                setToastMsg(result.message);
+                // Fallback for Copy Link on Mobile (Async Clipboard Blocked)
+                if (platform === 'copy' && result.error === 'clipboard_failed') {
+                    // Try to open native share sheet with just the link
+                    await shareViaNative(result.link, null);
+                    setToastMsg("🔗 Link active! Share manually.");
+                } else {
+                    setToastMsg(result.message);
+                }
                 setTimeout(() => setToastMsg(null), 5000);
             }
 
@@ -245,7 +262,7 @@ const FireWidget = () => {
                         initial={{ opacity: 0, y: 50, x: '-50%' }}
                         animate={{ opacity: 1, y: 0, x: '-50%' }}
                         exit={{ opacity: 0, y: 20, x: '-50%' }}
-                        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 w-[90%] max-w-md"
+                        className="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 z-[60] bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 w-[90%] max-w-md"
                         onClick={() => setToastMsg(null)}
                     >
                         <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
@@ -284,7 +301,7 @@ const FireWidget = () => {
 
                             <div className="grid grid-cols-3 gap-3 mb-6">
                                 {/* WhatsApp */}
-                                <button onClick={() => executeShare('whatsapp')} disabled={isSharing} className="flex flex-col items-center justify-center gap-3 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
+                                <button onClick={() => executeShare('whatsapp')} disabled={isSharing} className="hidden md:flex flex-col items-center justify-center gap-3 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
                                     <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
                                         <MessageCircle className="w-5 h-5 text-emerald-600" />
                                     </div>
@@ -296,7 +313,7 @@ const FireWidget = () => {
                                     <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform relative">
                                         {copied ? <CheckCircle className="w-5 h-5 text-emerald-500" /> : <Link className="w-5 h-5 text-indigo-600" />}
                                     </div>
-                                    <span className="text-xs font-bold text-slate-700">{copied ? 'Copied!' : 'Copy Link'}</span>
+                                    <span className="text-[10px] md:text-xs font-bold text-slate-700 text-center leading-tight">{copied ? 'Copied!' : 'Copy Link'}</span>
                                 </button>
 
                                 {/* Native Share / More */}
