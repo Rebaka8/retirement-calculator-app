@@ -31,7 +31,7 @@ const MainLayout = () => {
       <h4 className="font-bold text-slate-900 mt-6 mb-2">2. Local Storage</h4>
       <p className="mb-4">We may use local storage cookies to save your preferences or input data so you don't have to re-enter it every time you visit. You can clear this data at any time by clearing your browser cache.</p>
       <h4 className="font-bold text-slate-900 mt-6 mb-2">3. Third-Party Services</h4>
-      <p className="mb-4">We use tools made by other companies to make our website look good and understand how people use it. These tools may collect basic, anonymous information, but not personal details.</p>
+      <p className="mb-4">We use third-party services to enhance our platform's functionality. Specifically, we use <strong>Cloudinary</strong> for generating report previews and processing image assets. When you view a report preview, the necessary visual data is processed by Cloudinary to create these images.</p>
     </>
   );
 
@@ -44,6 +44,8 @@ const MainLayout = () => {
       <p className="mb-4">The content and tools provided on this website are for educational and informational purposes only. They do not constitute financial, investment, tax, or legal advice.</p>
       <h4 className="font-bold text-slate-900 mt-6 mb-2">3. No Guarantees</h4>
       <p className="mb-4">We do not guarantee the accuracy, completeness, or reliability of any calculations or information. Future financial outcomes are uncertain, and you should consult with a qualified professional before making financial decisions.</p>
+      <h4 className="font-bold text-slate-900 mt-6 mb-2">4. Third-Party Dependencies</h4>
+      <p className="mb-4">Our Report preview feature relies on <strong>Cloudinary</strong> for image generation. By using this feature, you acknowledge that report data allows for this processing. PDF reports are generated separately and do not rely on this service.</p>
     </>
   );
 

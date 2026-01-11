@@ -13,6 +13,7 @@ A modern, interactive financial planning tool designed to help you demystify the
 - **Smart Calculator**: Input your financials and get your "Freedom Date" instantly.
 - **FIRE Types Guide**: Learn the differences between Coast, Barista, Lean, Traditional, Slow, and Fat FIRE.
 - **PDF Reports**: Download a detailed summary of your financial roadmap.
+- **Smart Previews**: High-quality report previews powered by Cloudinary.
 - **Responsive Design**: Beautifully crafted interface that works on all devices.
 
 ---
@@ -38,6 +39,17 @@ A modern, interactive financial planning tool designed to help you demystify the
 Node.js (v16 or above recommended)
 
 npm (comes with Node.js)
+
+### 🔑 Configuration
+
+To enable the report preview feature, you need to configure Cloudinary. Create a `.env` file in the root directory and add the following keys:
+
+```bash
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
+```
+
+> **Note:** Without these credentials, the calculator will work, but report previews/sharing features may be limited.
 
 ### ▶️ Steps to Run
 
