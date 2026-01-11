@@ -143,7 +143,7 @@ const FireTypes = () => {
                     ))}
                 </div>
 
-                <ScrollArrow targetId="calculator-section" />
+                {!selectedFireType && <ScrollArrow targetId="calculator-section" />}
 
                 {/* Modal for Details */}
                 <AnimatePresence>
@@ -152,7 +152,7 @@ const FireTypes = () => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
                             onClick={() => setSelectedFireType(null)}
                         >
                             <motion.div
@@ -161,20 +161,23 @@ const FireTypes = () => {
                                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                                 onClick={(e) => e.stopPropagation()}
                                 className={`
-                                    relative w-full max-w-xl max-h-[85vh] overflow-y-auto rounded-[2rem] shadow-2xl
+                                    relative w-full max-w-xl max-h-[85vh] flex flex-col rounded-[2rem] shadow-2xl
                                     bg-gradient-to-br ${selectedFireType.bgGradient} border border-white/50
+                                    [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
                                 `}
                             >
-                                {/* Close Button */}
-                                <button
-                                    onClick={() => setSelectedFireType(null)}
-                                    className="absolute top-4 right-4 p-2 bg-white/50 hover:bg-white rounded-full transition-colors z-20 backdrop-blur-sm"
-                                >
-                                    <X className="w-5 h-5 text-slate-600" />
-                                </button>
+                                {/* Fixed Close Button Header */}
+                                <div className="absolute top-0 right-0 z-20 p-4">
+                                    <button
+                                        onClick={() => setSelectedFireType(null)}
+                                        className="p-2 bg-white/50 hover:bg-white rounded-full transition-colors backdrop-blur-sm shadow-sm"
+                                    >
+                                        <X className="w-5 h-5 text-slate-600" />
+                                    </button>
+                                </div>
 
-                                {/* Modal Content - Similar to previous Detail View */}
-                                <div className="p-6 md:p-8 relative overflow-hidden">
+                                {/* Scrollable Content */}
+                                <div className="p-5 md:p-6 pb-12 overflow-y-auto relative flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                     {/* Background Watermark */}
                                     <div className="absolute -bottom-10 -right-10 opacity-[0.05] transform rotate-12 pointer-events-none">
                                         {React.cloneElement(selectedFireType.icon, { size: 200, className: `text-black` })}
@@ -190,11 +193,11 @@ const FireTypes = () => {
                                         <h3 className="text-3xl font-black text-slate-900 tracking-tight mb-1">
                                             {selectedFireType.title}
                                         </h3>
-                                        <p className={`text-lg font-medium italic text-${selectedFireType.color}-700 opacity-90 mb-6`}>
+                                        <p className={`text-lg font-medium italic text-${selectedFireType.color}-700 opacity-90 mb-3`}>
                                             "{selectedFireType.tagline}"
                                         </p>
 
-                                        <div className="space-y-5">
+                                        <div className="space-y-4">
                                             <div className="bg-white/60 backdrop-blur-md p-5 rounded-2xl border border-white/50 shadow-sm">
                                                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                                                     <Zap className="w-3 h-3" /> What is it?
@@ -221,7 +224,7 @@ const FireTypes = () => {
                                                 </div>
                                             </div>
 
-                                            <div className="pt-4 flex justify-end">
+                                            <div className="pt-2 flex justify-end pb-2">
                                                 <button
                                                     onClick={() => {
                                                         setSelectedFireType(null);

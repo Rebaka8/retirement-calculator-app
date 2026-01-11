@@ -6,7 +6,7 @@ export const createReportDoc = (data, fireNumbers, mode) => {
     const date = new Date().toLocaleDateString();
 
     // -- HEADER --
-    doc.setFillColor(30, 41, 59); // Slate 800
+    doc.setFillColor(10, 37, 64); // Navy #0A2540
     doc.rect(0, 0, 210, 40, 'F');
 
     doc.setTextColor(255, 255, 255);
@@ -25,11 +25,17 @@ export const createReportDoc = (data, fireNumbers, mode) => {
     doc.setFont(undefined, 'bold');
     doc.text("1. Your Inputs", 20, 60);
 
+    // Divider
+    doc.setDrawColor(226, 232, 240); // Slate-200
+    doc.setLineWidth(0.5);
+    doc.line(20, 63, 190, 63);
+
     doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
     doc.setTextColor(80);
 
     const inputData = [
+        `Current Age: ${data.currentAge || 25} Years`,
         `Return Rate Assumption: ${data.investmentReturnRate}%`,
         `Inflation Assumption: ${data.inflationRate}%`,
         `Current Corpus: Rs. ${(data.currentCorpus / 100000).toFixed(2)} L`
@@ -37,10 +43,10 @@ export const createReportDoc = (data, fireNumbers, mode) => {
 
     if (mode === 'income') {
         inputData.unshift(`Annual Income: Rs. ${(data.annualIncome / 100000).toFixed(2)} L`);
-        inputData.splice(1, 0, `Annual Expenses: Rs. ${(data.annualExpenses / 100000).toFixed(2)} L`);
+        inputData.splice(2, 0, `Annual Expenses: Rs. ${(data.annualExpenses / 100000).toFixed(2)} L`);
     } else {
         inputData.unshift(`Dream Target: Rs. ${(data.targetCorpus / 10000000).toFixed(2)} Cr`);
-        inputData.splice(1, 0, `Timeline: ${data.yearsToRetire} Years`);
+        inputData.splice(2, 0, `Timeline: ${data.yearsToRetire} Years`);
     }
 
     let y = 70;
@@ -55,6 +61,11 @@ export const createReportDoc = (data, fireNumbers, mode) => {
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text("2. The Strategy", 20, y);
+
+    // Divider
+    doc.setDrawColor(226, 232, 240);
+    doc.line(20, y + 3, 190, y + 3);
+
     y += 10;
 
     // Summary Box
@@ -67,10 +78,12 @@ export const createReportDoc = (data, fireNumbers, mode) => {
     let summaryText = "";
     if (mode === 'income') {
         const savings = data.annualIncome - data.annualExpenses;
-        summaryText = `With your current savings of Rs. ${(savings / 100000).toFixed(2)}L per year, you are on track to hit Traditional FIRE in ${data.yearsToRetire || 'X'} years. Increasing your savings rate is the #1 lever to pull.`;
+        const years = data.yearsToRetire || 'X';
+        const freedomAge = (data.currentAge || 25) + parseInt(years);
+        summaryText = `You will attain your financial freedom through Traditional FIRE in ${years} years (at Age ${freedomAge}). With current savings of Rs. ${(savings / 100000).toFixed(2)}L/yr, you're on track.`;
     } else {
-        // rough calc for report text
-        summaryText = "To reach your Dream Target, you'll need to aggressively save and invest. Focus on increasing income streams while keeping lifestyle inflation in check.";
+        const freedomAge = (data.currentAge || 25) + parseInt(data.yearsToRetire);
+        summaryText = `You will attain your financial freedom through your Goal-Based Plan in ${data.yearsToRetire} years (at Age ${freedomAge}). Focus on increasing income streams while keeping lifestyle inflation in check.`;
     }
 
     // Split text to fit
@@ -86,12 +99,13 @@ export const createReportDoc = (data, fireNumbers, mode) => {
         doc.text("3. FIRE Benchmarks", 20, y);
         y += 10;
 
-        const headers = ["Type", "Corpus Needed", "Status"];
+        const headers = ["Type", "Corpus Needed", "Time", "Freedom Age"];
         doc.setFontSize(10);
         doc.setTextColor(100);
         doc.text(headers[0], 25, y);
-        doc.text(headers[1], 80, y);
-        doc.text(headers[2], 140, y);
+        doc.text(headers[1], 70, y);
+        doc.text(headers[2], 120, y);
+        doc.text(headers[3], 160, y);
 
         y += 5;
         doc.setLineWidth(0.5);
@@ -104,7 +118,7 @@ export const createReportDoc = (data, fireNumbers, mode) => {
         // All 6 FIRE Types
         const types = [
             { name: "Coast FIRE", val: fireNumbers.coast, desc: "Invest now, relax later" },
-            { name: "Barista FIRE", val: fireNumbers.barista, desc: "Part-time work covers expenses" },
+            { name: "Barista FIRE", val: fireNumbers.barista, desc: "Part-time work" },
             { name: "Lean FIRE", val: fireNumbers.lean, desc: "Minimalist living" },
             { name: "Traditional", val: fireNumbers.traditional, desc: "Standard retirement" },
             { name: "Slow FIRE", val: fireNumbers.slow, desc: "Enjoying the journey" },
@@ -114,38 +128,44 @@ export const createReportDoc = (data, fireNumbers, mode) => {
         // Helper to calculate years (copied logic from FireContext for standalone report)
         const calculateYears = (target) => {
             const netWorth = parseFloat(data.currentCorpus) || 0;
-            if (netWorth >= target) return "Achieved!";
+            if (netWorth >= target) return { years: 0, text: "Done!" };
 
             const savings = data.annualIncome - data.annualExpenses;
             const r = (parseFloat(data.investmentReturnRate) || 8) / 100;
             const i = (parseFloat(data.inflationRate) || 6) / 100;
             const realReturn = ((1 + r) / (1 + i)) - 1;
 
-            if (savings <= 0) return "Impossible (No Savings)";
+            if (savings <= 0) return { years: 999, text: "Impossible" };
 
             // NPER simplified
             if (Math.abs(realReturn) < 0.001) {
                 const years = Math.ceil((target - netWorth) / savings);
-                return `~${years} Years`;
+                return { years, text: `${years} Years` };
             }
 
             const numerator = (savings + (target * realReturn));
             const denominator = (savings + (netWorth * realReturn));
 
-            if (denominator <= 0 || numerator / denominator <= 0) return "Check Inputs";
+            if (denominator <= 0 || numerator / denominator <= 0) return { years: 999, text: "Check Inputs" };
 
             const years = Math.log(numerator / denominator) / Math.log(1 + realReturn);
             const y = Math.max(0, Math.ceil(years));
-            return `Need ~${y} Years`;
+            return { years: y, text: `${y} Years` };
         };
 
         types.forEach(t => {
             const val = t.val || 0;
             doc.text(t.name, 25, y);
-            doc.text(`Rs. ${(val / 10000000).toFixed(2)} Cr`, 80, y);
+            doc.text(`Rs. ${(val / 10000000).toFixed(2)} Cr`, 70, y);
 
-            const status = calculateYears(val);
-            doc.text(status, 140, y);
+            const result = calculateYears(val);
+            doc.text(result.text, 120, y);
+
+            // Freedom Age
+            const currentAge = parseInt(data.currentAge) || 25;
+            const freedomAge = result.years === 999 ? "Never" : (currentAge + result.years);
+            doc.text(`${freedomAge}`, 160, y);
+
             y += 10;
         });
     }
@@ -164,4 +184,10 @@ export const createReportDoc = (data, fireNumbers, mode) => {
 export const generateFireReport = (data, fireNumbers, mode = 'income') => {
     const doc = createReportDoc(data, fireNumbers, mode);
     doc.save("FIRE_Freedom_Plan.pdf");
+};
+
+// -- EXPORTED FUNCTION 2: Get Blob (For Sharing) --
+export const getFireReportBlob = (data, fireNumbers, mode = 'income') => {
+    const doc = createReportDoc(data, fireNumbers, mode);
+    return doc.output('blob');
 };

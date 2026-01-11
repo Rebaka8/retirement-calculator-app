@@ -13,6 +13,9 @@ import FireWidget from './components/Calculator/FireWidget';
 import FAQ from './components/Landing/FAQ';
 import Logo from './components/Logo';
 
+import { Routes, Route } from 'react-router-dom';
+import ReportPreview from './components/Report/ReportPreview';
+
 const MainLayout = () => {
   const calculatorRef = useRef(null);
   const [legalModal, setLegalModal] = useState({ isOpen: false, title: '', content: null });
@@ -23,13 +26,10 @@ const MainLayout = () => {
     <>
       <p className="mb-4"><strong>Effective Date:</strong> January 1, {startYear}</p>
       <p className="mb-4">Your privacy is important to us. It is FIRE Tracker's policy to respect your privacy regarding any information we may collect from you across our website.</p>
-
       <h4 className="font-bold text-slate-900 mt-6 mb-2">1. Information We Collect</h4>
       <p className="mb-4">We do not collect any personal identifiable information (PII) on our servers. All calculations are performed client-side within your browser. The data you enter (income, expenses, corpus) remains on your device and is not transmitted to us.</p>
-
       <h4 className="font-bold text-slate-900 mt-6 mb-2">2. Local Storage</h4>
       <p className="mb-4">We may use local storage cookies to save your preferences or input data so you don't have to re-enter it every time you visit. You can clear this data at any time by clearing your browser cache.</p>
-
       <h4 className="font-bold text-slate-900 mt-6 mb-2">3. Third-Party Services</h4>
       <p className="mb-4">We use tools made by other companies to make our website look good and understand how people use it. These tools may collect basic, anonymous information, but not personal details.</p>
     </>
@@ -38,13 +38,10 @@ const MainLayout = () => {
   const TERMS_CONTENT = (
     <>
       <p className="mb-4"><strong>Last Updated:</strong> January 1, {startYear}</p>
-
       <h4 className="font-bold text-slate-900 mt-6 mb-2">1. Acceptance of Terms</h4>
       <p className="mb-4">By accessing or using FIRE Tracker, you agree to be bound by these Terms of Service. If you do not agree, please do not use our services.</p>
-
       <h4 className="font-bold text-slate-900 mt-6 mb-2">2. Educational Purpose Only</h4>
       <p className="mb-4">The content and tools provided on this website are for educational and informational purposes only. They do not constitute financial, investment, tax, or legal advice.</p>
-
       <h4 className="font-bold text-slate-900 mt-6 mb-2">3. No Guarantees</h4>
       <p className="mb-4">We do not guarantee the accuracy, completeness, or reliability of any calculations or information. Future financial outcomes are uncertain, and you should consult with a qualified professional before making financial decisions.</p>
     </>
@@ -93,7 +90,7 @@ const MainLayout = () => {
 
         <FireTypes />
 
-        <div ref={calculatorRef} id="calculator-section" className="relative min-h-[400px] scroll-mt-24">
+        <div ref={calculatorRef} id="calculator-section" className="relative min-h-[400px] scroll-mt-20">
           <FireWidget />
         </div>
 
@@ -153,7 +150,10 @@ const MainLayout = () => {
 function App() {
   return (
     <FireProvider>
-      <MainLayout />
+      <Routes>
+        <Route path="/" element={<MainLayout />} />
+        <Route path="/report/preview" element={<ReportPreview />} />
+      </Routes>
     </FireProvider>
   );
 }

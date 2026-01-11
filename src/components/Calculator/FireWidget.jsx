@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useFire } from '../../context/FireContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, RefreshCw, TrendingUp, Zap, AlertTriangle, CheckCircle, Target, Wallet, FileText, Share2, X, Link, Mail, MessageCircle } from 'lucide-react';
-import { generateFireReport, createReportDoc } from '../Report/DownloadReport';
+import { generateFireReport, createReportDoc, getFireReportBlob } from '../Report/DownloadReport';
+import { handleShareReport, downloadPDF } from '../../utils/shareUtils';
 import Tooltip from '../UI/Tooltip';
 import ScrollArrow from '../UI/ScrollArrow';
 
@@ -43,6 +44,13 @@ const FireWidget = () => {
         calculateRequiredSavings,
         resetData
     } = useFire();
+
+    // Default Age if not in context
+    useEffect(() => {
+        if (!data.currentAge) {
+            updateData('currentAge', 25);
+        }
+    }, []);
 
     const [mode, setMode] = useState(() => {
         const p = new URLSearchParams(window.location.search);
@@ -87,7 +95,6 @@ const FireWidget = () => {
     const params = new URLSearchParams(window.location.search);
     const isReportView = params.get('view') === 'report';
     const [pdfUrl, setPdfUrl] = useState(null);
-    const [showShareFallback, setShowShareFallback] = useState(false);
 
     // Auto-Generate PDF for Report View
     useEffect(() => {
@@ -154,88 +161,155 @@ const FireWidget = () => {
         );
     }
 
-    const handleShare = async () => {
-        try {
-            const doc = createReportDoc(data, fireNumbers, mode);
-            const blob = doc.output('blob');
-            const file = new File([blob], "FIRE_Freedom_Plan.pdf", { type: "application/pdf" });
+    // Share Modal State
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [shareBlob, setShareBlob] = useState(null);
+    const [isGeneratingShare, setIsGeneratingShare] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const [toastMsg, setToastMsg] = useState(null);
+    const [isSharing, setIsSharing] = useState(false);
 
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    files: [file],
-                    title: 'My FIRE Freedom Plan',
-                    text: 'Here is my personalized FIRE path report!',
-                });
-            } else {
-                setShowShareFallback(true);
-            }
+    const handleShareClick = async () => {
+        setIsGeneratingShare(true);
+        try {
+            // Generate PDF Blob (NEW way!)
+            const blob = getFireReportBlob(data, fireNumbers, mode);
+            setShareBlob(blob);
+            setShowShareModal(true);
         } catch (error) {
-            console.error("Error sharing:", error);
-            setShowShareFallback(true); // Fallback if user cancels or API fails
+            console.error("Error generating share blob:", error);
+            alert("Could not generate report for sharing.");
+        } finally {
+            setIsGeneratingShare(false);
+        }
+    };
+
+    const executeShare = async (platform) => {
+        if (!shareBlob) return;
+        setIsSharing(true);
+
+        try {
+            // Prepare data context
+            const reportData = {
+                currentAge: data.currentAge,
+                yearsToRetire: data.yearsToRetire,
+                // ... add other relevant data if needed for fallback text
+            };
+
+            if (platform === 'download') {
+                downloadPDF(shareBlob);
+                setToastMsg("✅ Download started!");
+                setTimeout(() => setToastMsg(null), 3000);
+                setIsSharing(false);
+                return;
+            }
+
+            // Fix for Browser Popup Blockers (especially Desktop WhatsApp)
+            let popupWindow = null;
+            if (platform === 'whatsapp' && !/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+                popupWindow = window.open('', '_blank');
+                if (popupWindow) {
+                    popupWindow.document.write('<html><body style="background:#f0f2f5;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#54656f;"><h2>🚀 Preparing WhatsApp...</h2></body></html>');
+                }
+            }
+
+            const result = await handleShareReport(shareBlob, reportData, platform, popupWindow);
+
+            if (result.success) {
+                if (platform === 'copy' || platform === 'copy-text') {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                }
+                setToastMsg(result.message);
+                setTimeout(() => setToastMsg(null), 4000);
+            } else {
+                setToastMsg(result.message);
+                setTimeout(() => setToastMsg(null), 5000);
+            }
+
+        } catch (error) {
+            console.error("Share execution failed:", error);
+            setToastMsg("❌ Sharing failed. Please try again.");
+            setTimeout(() => setToastMsg(null), 4000);
+        } finally {
+            setIsSharing(false);
         }
     };
 
     return (
         <section className="py-8 bg-white relative">
-            {/* Share Fallback Modal */}
+            {/* Action Toast */}
             <AnimatePresence>
-                {showShareFallback && (
+                {toastMsg && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, x: '-50%' }}
+                        animate={{ opacity: 1, y: 0, x: '-50%' }}
+                        exit={{ opacity: 0, y: 20, x: '-50%' }}
+                        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 w-[90%] max-w-md"
+                        onClick={() => setToastMsg(null)}
+                    >
+                        <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
+                        <p className="text-xs font-bold leading-relaxed flex-1">
+                            {toastMsg}
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            {/* Share Modal */}
+            <AnimatePresence>
+                {showShareModal && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-                        onClick={() => setShowShareFallback(false)}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                        onClick={() => setShowShareModal(false)}
                     >
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl overflow-hidden relative"
                             onClick={e => e.stopPropagation()}
                         >
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-bold text-slate-800">Share Report</h3>
-                                <button onClick={() => setShowShareFallback(false)} className="p-1 hover:bg-slate-100 rounded-full">
-                                    <X className="w-5 h-5 text-slate-500" />
+                            <div className="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-800">Share Report</h3>
+                                    <p className="text-xs text-slate-500 font-medium">Choose how you want to send your plan.</p>
+                                </div>
+                                <button onClick={() => setShowShareModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                                    <X className="w-5 h-5 text-slate-400" />
                                 </button>
                             </div>
 
-                            <p className="text-sm text-slate-500 mb-6">
-                                Your browser doesn't support direct file sharing. You can share the link to this calculator instead!
-                            </p>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <a
-                                    href={`https://wa.me/?text=Check%20out%20this%20FIRE%20Calculator!%20${encodeURIComponent(window.location.href)}`}
-                                    target="_blank" rel="noopener noreferrer"
-                                    className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-200 hover:bg-emerald-50 hover:border-emerald-200 transition-colors group"
-                                >
-                                    <MessageCircle className="w-6 h-6 text-emerald-500 group-hover:scale-110 transition-transform" />
-                                    <span className="text-xs font-bold text-slate-600">WhatsApp</span>
-                                </a>
-
-                                <a
-                                    href={`mailto:?subject=Check%20out%20this%20FIRE%20Calculator&body=Here%20is%20a%20great%20tool%20to%20plan%20your%20financial%20independence:%20${encodeURIComponent(window.location.href)}`}
-                                    className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-200 hover:bg-blue-50 hover:border-blue-200 transition-colors group"
-                                >
-                                    <Mail className="w-6 h-6 text-blue-500 group-hover:scale-110 transition-transform" />
-                                    <span className="text-xs font-bold text-slate-600">Email</span>
-                                </a>
-
-                                <button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(window.location.href);
-                                        setCopied(true);
-                                        setTimeout(() => setCopied(false), 2000);
-                                    }}
-                                    className={`col-span-2 flex items-center justify-center gap-2 p-3 rounded-xl border transition-colors ${copied ? 'bg-slate-800 text-white border-slate-800' : 'border-slate-200 hover:bg-slate-50'}`}
-                                >
-                                    {copied ? <CheckCircle className="w-4 h-4" /> : <Link className="w-4 h-4 text-slate-500" />}
-                                    <span className={`text-xs font-bold ${copied ? 'text-white' : 'text-slate-600'}`}>
-                                        {copied ? 'Copied Link!' : 'Copy Link'}
-                                    </span>
+                            <div className="grid grid-cols-3 gap-3 mb-6">
+                                {/* WhatsApp */}
+                                <button onClick={() => executeShare('whatsapp')} disabled={isSharing} className="flex flex-col items-center justify-center gap-3 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <MessageCircle className="w-5 h-5 text-emerald-600" />
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-700">WhatsApp</span>
                                 </button>
+
+                                {/* Copy Link */}
+                                <button onClick={() => executeShare('copy')} disabled={isSharing} className="flex flex-col items-center justify-center gap-3 p-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform relative">
+                                        {copied ? <CheckCircle className="w-5 h-5 text-emerald-500" /> : <Link className="w-5 h-5 text-indigo-600" />}
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-700">{copied ? 'Copied!' : 'Copy Link'}</span>
+                                </button>
+
+                                {/* Native Share / More */}
+                                <button onClick={() => executeShare('native')} disabled={isSharing} className="flex flex-col items-center justify-center gap-3 p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <Share2 className="w-5 h-5 text-slate-600" />
+                                    </div>
+                                    <span className="text-xs font-bold text-slate-700">More</span>
+                                </button>
+                            </div>
+
+                            <div className="text-center p-3 bg-slate-50 rounded-xl text-[10px] text-slate-400">
+                                Note: Some apps may not support direct PDF file sharing. In that case, we'll try to share a summary text or help you download the file.
                             </div>
                         </motion.div>
                     </motion.div>
@@ -286,6 +360,16 @@ const FireWidget = () => {
                             {/* DYNAMIC INPUTS BASED ON MODE */}
                             {mode === 'income' ? (
                                 <>
+                                    <InputPair
+                                        label="Current Age"
+                                        tooltip="Your age today."
+                                        value={data.currentAge || 25}
+                                        min={18} max={80} step={1}
+                                        onChange={(e) => updateData('currentAge', Number(e.target.value))}
+                                        color="indigo"
+                                        suffix="Years"
+                                    />
+
                                     <InputPair
                                         label="Annual Income"
                                         tooltip="Your total yearly earnings before tax from all sources."
@@ -476,10 +560,11 @@ const FireWidget = () => {
 
                         <div className="mt-4 flex gap-3">
                             <button
-                                onClick={handleShare}
+                                onClick={handleShareClick}
+                                disabled={isGeneratingShare}
                                 className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-white border-2 border-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-50 hover:border-slate-200 transition-all active:scale-95 text-sm"
                             >
-                                <Share2 className="w-4 h-4" />
+                                {isGeneratingShare ? <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> : <Share2 className="w-4 h-4" />}
                                 Share
                             </button>
 
