@@ -201,9 +201,8 @@ const FireWidget = () => {
         try {
             // Prepare data context
             const reportData = {
-                currentAge: data.currentAge,
-                yearsToRetire: data.yearsToRetire,
-                // ... add other relevant data if needed for fallback text
+                ...data, // Pass full data for Permalink generation
+                // Explicit overrides if needed, though ...data covers it
             };
 
             if (platform === 'download') {
@@ -301,15 +300,7 @@ const FireWidget = () => {
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-3 mb-6">
-                                {/* WhatsApp */}
-                                <button onClick={() => executeShare('whatsapp')} disabled={isSharing} className="hidden md:flex flex-col items-center justify-center gap-3 p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <MessageCircle className="w-5 h-5 text-emerald-600" />
-                                    </div>
-                                    <span className="text-xs font-bold text-slate-700">WhatsApp</span>
-                                </button>
-
+                            <div className="grid grid-cols-2 gap-3 mb-6">
                                 {/* Copy Link */}
                                 <button onClick={() => executeShare('copy')} disabled={isSharing} className="flex flex-col items-center justify-center gap-3 p-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 transition-all group disabled:opacity-50 disabled:cursor-not-allowed">
                                     <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform relative">
@@ -534,7 +525,7 @@ const FireWidget = () => {
                                 lean: data.targetCorpus * 0.7,
                                 fat: data.targetCorpus * 2,
                                 barista: data.targetCorpus * 0.55,
-                                slow: data.targetCorpus,
+                                slow: data.targetCorpus * (33.33 / 25),
                                 coast: (() => {
                                     // Calculate Coast for Goal Mode
                                     // Target required NOW to grow to Goal in 'yearsToRetire'

@@ -39,21 +39,23 @@ export const FireProvider = ({ children }) => {
 
     const fireNumbers = useMemo(() => {
         const expenses = parseFloat(data.annualExpenses) || 0;
-        const multiplier = 25;
 
-        const normalFire = expenses * multiplier;
-        const leanFire = (expenses * 0.7) * multiplier;
-        const fatExpenses = expenses * 2;
-        const fatFire = fatExpenses * multiplier;
-        const baristaFire = normalFire * 0.5;
+        // Multipliers based on User Definitions
+        const traditionalFire = expenses * 25;       // Standard 4% rule
+        const leanFire = expenses * 12.5;            // 8% withdrawal (50% expenses)
+        const fatFire = expenses * 50;               // 2% withdrawal (Luxury)
+        const baristaFire = expenses * 12.5;         // Same as Lean (Part-time covers rest)
+        const slowFire = expenses * 33.33;           // 3% withdrawal (Conservative)
 
-        // Coast FIRE
-        const yearsTo60 = Math.max(0, 60 - (data.age || 30));
-        const realRate = (data.investmentReturnRate - data.inflationRate) / 100;
-        const effectiveRate = realRate > 0 ? realRate : 0.001;
-        const coastFire = normalFire / Math.pow(1 + effectiveRate, yearsTo60);
+        // Coast FIRE: Amount needed NOW to hit Traditional FIRE by 60 without further saving
+        const currentAgeVal = parseFloat(data.currentAge) || 30; // Changed to currentAge as per recent naming
+        const yearsTo60 = Math.max(0, 60 - currentAgeVal);
 
-        const slowFire = normalFire;
+        // Use Real Rate for Coasting calculation ?? Or Nominal?
+        // Standard Coast FIRE usually uses Nominal Rate assumption for compounding (e.g. 8% growth)
+        // User example used 1.08 assuming 8%. Let's use user's investmentReturnRate (nominal).
+        const rate = (parseFloat(data.investmentReturnRate) || 6) / 100;
+        const coastFire = traditionalFire / Math.pow(1 + rate, yearsTo60);
 
         return {
             lean: leanFire,
@@ -61,7 +63,7 @@ export const FireProvider = ({ children }) => {
             barista: baristaFire,
             coast: coastFire,
             slow: slowFire,
-            traditional: normalFire
+            traditional: traditionalFire
         };
     }, [data]);
 

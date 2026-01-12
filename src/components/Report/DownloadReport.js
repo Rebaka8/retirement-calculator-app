@@ -131,8 +131,8 @@ export const createReportDoc = (data, fireNumbers, mode) => {
             if (netWorth >= target) return { years: 0, text: "Done!" };
 
             const savings = data.annualIncome - data.annualExpenses;
-            const r = (parseFloat(data.investmentReturnRate) || 8) / 100;
-            const i = (parseFloat(data.inflationRate) || 6) / 100;
+            const r = (parseFloat(data.investmentReturnRate) || 6) / 100;
+            const i = (parseFloat(data.inflationRate) || 3) / 100;
             const realReturn = ((1 + r) / (1 + i)) - 1;
 
             if (savings <= 0) return { years: 999, text: "Impossible" };

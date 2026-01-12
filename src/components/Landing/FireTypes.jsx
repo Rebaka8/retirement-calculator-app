@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, Coffee, Home, Clock, Anchor, Briefcase, ArrowRight, Zap, Star, X } from 'lucide-react';
+import { TrendingUp, Coffee, Home, Clock, Anchor, Briefcase, ArrowRight, Zap, Star, X, ChevronDown } from 'lucide-react';
 import ScrollArrow from '../UI/ScrollArrow';
 
 const FireTypes = () => {
@@ -178,7 +178,8 @@ const FireTypes = () => {
                                 </div>
 
                                 {/* Scrollable Content */}
-                                <div className="p-5 md:p-6 pb-12 overflow-y-auto relative flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                                {/* ADDED pt-12 to fix "Edges Touching" on Mobile */}
+                                <div className="p-5 pt-12 md:p-6 pb-4 overflow-y-auto relative flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                     {/* Background Watermark */}
                                     <div className="absolute -bottom-10 -right-10 opacity-[0.05] transform rotate-12 pointer-events-none">
                                         {React.cloneElement(selectedFireType.icon, { size: 200, className: `text-black` })}
@@ -225,7 +226,14 @@ const FireTypes = () => {
                                                 </div>
                                             </div>
 
-                                            <div className="pt-2 flex justify-end pb-2">
+                                            {/* Action + Scroll Hint */}
+                                            <div className="pt-2 flex flex-col items-center justify-end pb-2 gap-2">
+                                                {/* Mobile Scroll Hint (Only Visible on Small Screens) */}
+                                                <div className="md:hidden flex flex-col items-center animate-bounce opacity-60 pointer-events-none mb-2">
+                                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Scroll Down</span>
+                                                    <ChevronDown className="w-4 h-4 text-slate-500" />
+                                                </div>
+
                                                 <button
                                                     onClick={() => {
                                                         setSelectedFireType(null);
