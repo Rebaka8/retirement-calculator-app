@@ -34,11 +34,11 @@ const FAQ = () => {
     };
 
     return (
-        <section id="faq-section" className="py-20 bg-slate-50 border-t border-slate-200 scroll-mt-28">
+        <section id="faq-section" className="py-12 md:py-20 bg-slate-50 border-t border-slate-200 scroll-mt-28">
             <div className="max-w-3xl mx-auto px-6">
                 <div className="text-center mb-12">
                     <span className="text-slate-400 font-bold uppercase tracking-wider text-xs">Doubts?</span>
-                    <h2 className="text-3xl font-bold text-slate-900 mt-2">Frequently Asked Questions</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mt-2">Frequently Asked Questions</h2>
                 </div>
 
                 <div className="space-y-4">
@@ -46,7 +46,7 @@ const FAQ = () => {
                         <div key={index} className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
                             <button
                                 onClick={() => toggleFaq(index)}
-                                className="w-full flex justify-between items-center p-6 text-left hover:bg-slate-50 transition-colors"
+                                className="w-full flex justify-between items-center p-4 md:p-6 text-left hover:bg-slate-50 transition-colors"
                             >
                                 <span className="font-bold text-slate-800">{faq.q}</span>
                                 {openFaq === index ? <ChevronUp className="w-5 h-5 text-slate-500" /> : <ChevronDown className="w-5 h-5 text-slate-500" />}
@@ -59,7 +59,7 @@ const FAQ = () => {
                                         exit={{ height: 0, opacity: 0 }}
                                         className="overflow-hidden"
                                     >
-                                        <div className="p-6 pt-0 text-slate-600 text-sm leading-relaxed border-t border-slate-100">
+                                        <div className="p-4 md:p-6 pt-0 text-slate-600 text-sm leading-relaxed border-t border-slate-100">
                                             {faq.a}
                                         </div>
                                     </motion.div>

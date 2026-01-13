@@ -161,7 +161,7 @@ const FireTypes = () => {
                                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                                 onClick={(e) => e.stopPropagation()}
                                 className={`
-                                    relative w-[90%] max-w-xl max-h-[75vh] flex flex-col rounded-[2rem] shadow-2xl
+                                    relative w-[85%] max-w-xl max-h-[75vh] flex flex-col rounded-[2rem] shadow-2xl
                                     bg-gradient-to-br ${selectedFireType.bgGradient} border border-white/50
                                     [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
                                     my-auto mx-auto
@@ -179,7 +179,7 @@ const FireTypes = () => {
 
                                 {/* Scrollable Content */}
                                 {/* ADDED pt-12 to fix "Edges Touching" on Mobile */}
-                                <div className="p-5 pt-12 md:p-6 pb-4 overflow-y-auto relative flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                                <div className="p-6 pt-12 md:p-8 pb-4 overflow-y-auto relative flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                     {/* Background Watermark */}
                                     <div className="absolute -bottom-10 -right-10 opacity-[0.05] transform rotate-12 pointer-events-none">
                                         {React.cloneElement(selectedFireType.icon, { size: 200, className: `text-black` })}

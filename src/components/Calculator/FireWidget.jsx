@@ -52,11 +52,57 @@ const FireWidget = () => {
         }
     }, []);
 
+
     const [mode, setMode] = useState(() => {
         const p = new URLSearchParams(window.location.search);
         return p.get('mode') === 'goal' ? 'goal' : 'income';
     });
 
+    const [showResults, setShowResults] = useState(false);
+    const [touched, setTouched] = useState(false);
+
+    // Validation Logic
+    const validate = () => {
+        const errors = {};
+        const isNum = (v) => v !== "" && v !== null && !isNaN(Number(v));
+
+        if (mode === 'income') {
+            if (!isNum(data.currentAge)) errors.currentAge = "Age is required";
+            if (!isNum(data.annualIncome)) errors.annualIncome = "Income is required";
+            if (!isNum(data.annualExpenses)) errors.annualExpenses = "Expenses are required";
+        } else {
+            if (!isNum(data.targetCorpus)) errors.targetCorpus = "Target is required";
+            if (!isNum(data.yearsToRetire)) errors.yearsToRetire = "Years are required";
+        }
+
+        // Global
+        if (!isNum(data.investmentReturnRate)) errors.investmentReturnRate = "Return Rate required";
+        if (!isNum(data.inflationRate)) errors.inflationRate = "Inflation required";
+
+        return errors;
+    };
+
+    const errors = validate();
+    const isValid = Object.keys(errors).length === 0;
+
+    const handleCalculate = () => {
+        setTouched(true);
+        if (isValid) {
+            setShowResults(true);
+            // Scroll to top of widget on mobile to simulate page change
+            const widget = document.getElementById('fire-widget');
+            if (widget && window.innerWidth < 1024) {
+                widget.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    };
+
+    const handleInputChange = (field, value) => {
+        updateData(field, value);
+        // setShowResults(false); // OPTIONAL: If we want to stay on result page while editing (desktop), keep true.
+        // But for mobile "Page" logic, if they edit, they are on Input "Page".
+        setShowResults(false);
+    };
 
     // Initial Loading Guard
     if (!data || !fireNumbers) return <div className="p-12 text-center text-slate-400">Loading Calculator...</div>;
@@ -255,7 +301,7 @@ const FireWidget = () => {
     };
 
     return (
-        <section className="py-8 bg-white relative">
+        <section id="fire-widget" className="py-8 bg-white relative">
             {/* Action Toast */}
             <AnimatePresence>
                 {toastMsg && (
@@ -363,7 +409,7 @@ const FireWidget = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
 
                     {/* LEFT COLUMN: Inputs (Span 5) */}
-                    <div className="lg:col-span-5 space-y-5">
+                    <div className={`lg:col-span-5 space-y-5 ${showResults ? 'hidden lg:block' : 'block'}`}>
 
                         <div className="bg-slate-50 p-5 md:p-6 rounded-[2rem] border border-slate-100 shadow-inner space-y-5">
 
@@ -484,11 +530,33 @@ const FireWidget = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            <button
+                                onClick={handleCalculate}
+                                disabled={!isValid}
+                                className={`lg:hidden w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2
+                                    ${isValid
+                                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-indigo-200 hover:-translate-y-1'
+                                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                            >
+                                <Zap className={`w-5 h-5 ${isValid ? 'text-yellow-300 fill-current' : ''}`} />
+                                {isValid ? 'Calculate Independence' : 'Enter Details...'}
+                            </button>
                         </div>
                     </div>
 
                     {/* RIGHT COLUMN: Results (Span 7) */}
-                    <div className="lg:col-span-7 flex flex-col h-full space-y-5">
+                    <div className={`lg:col-span-7 flex flex-col h-full space-y-5 ${!showResults ? 'hidden lg:flex' : 'flex'}`}>
+
+                        {/* Mobile Back Button */}
+                        <div className="lg:hidden mb-2">
+                            <button
+                                onClick={() => setShowResults(false)}
+                                className="text-slate-500 font-bold text-sm flex items-center hover:text-indigo-600 transition-colors"
+                            >
+                                ← Edit Inputs
+                            </button>
+                        </div>
 
                         {/* DYNAMIC SUMMARY BLOCK */}
                         <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-5 md:p-6 text-white relative overflow-hidden shadow-2xl">
@@ -586,15 +654,13 @@ const FireWidget = () => {
                                 Download Report
                             </button>
                         </div>
+
                     </div>
                 </div>
 
-                {/* GRAPH REMOVED AS PER USER REQUEST */}
-
                 <ScrollArrow targetId="simple-truths" />
+
             </div>
-
-
         </section>
     );
 };
