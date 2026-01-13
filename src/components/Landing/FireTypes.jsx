@@ -186,62 +186,56 @@ const FireTypes = () => {
                                     </div>
 
                                     <div className="relative z-10">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-white/80 backdrop-blur text-${selectedFireType.color}-600 shadow-sm border border-${selectedFireType.color}-100`}>
+                                        <div className="flex flex-col items-center text-center md:items-start md:text-left mb-6">
+                                            <div className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-white/80 backdrop-blur text-${selectedFireType.color}-600 shadow-sm border border-${selectedFireType.color}-100 mb-3`}>
                                                 {selectedFireType.desc}
                                             </div>
-                                        </div>
 
-                                        <h3 className="text-3xl font-black text-slate-900 tracking-tight mb-1">
-                                            {selectedFireType.title}
-                                        </h3>
-                                        <p className={`text-lg font-medium italic text-${selectedFireType.color}-700 opacity-90 mb-3`}>
-                                            "{selectedFireType.tagline}"
-                                        </p>
+                                            <h3 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2 leading-tight">
+                                                {selectedFireType.title}
+                                            </h3>
+                                            <p className={`text-lg md:text-xl font-medium italic text-${selectedFireType.color}-700 opacity-90`}>
+                                                "{selectedFireType.tagline}"
+                                            </p>
+                                        </div>
 
                                         <div className="space-y-4">
                                             <div className="bg-white/60 backdrop-blur-md p-5 rounded-2xl border border-white/50 shadow-sm">
                                                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                                                     <Zap className="w-3 h-3" /> What is it?
                                                 </h4>
-                                                <p className="text-base text-slate-800 leading-relaxed font-medium">
+                                                <p className="text-sm md:text-base text-slate-800 leading-relaxed font-medium text-justify md:text-left">
                                                     {selectedFireType.detail}
                                                 </p>
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="bg-slate-900 text-white p-4 rounded-xl shadow-lg relative overflow-hidden">
+                                                <div className="bg-slate-900 text-white p-5 rounded-xl shadow-lg relative overflow-hidden">
                                                     <div className={`absolute top-0 right-0 w-24 h-24 bg-${selectedFireType.color}-500 blur-[40px] opacity-40`}></div>
-                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">The Target</h4>
-                                                    <div className="text-lg font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
+                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">The Target</h4>
+                                                    <div className="text-base md:text-lg font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-300 break-words leading-snug">
                                                         {selectedFireType.corpus}
                                                     </div>
                                                 </div>
 
                                                 <div className="bg-white/60 backdrop-blur-md p-4 rounded-xl border border-white/50 shadow-sm">
-                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Real Example</h4>
+                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Real Example</h4>
                                                     <p className="text-slate-700 italic text-xs leading-relaxed">
                                                         "{selectedFireType.example}"
                                                     </p>
                                                 </div>
                                             </div>
 
-                                            {/* Action + Scroll Hint */}
-                                            <div className="pt-2 flex flex-col items-center justify-end pb-2 gap-2">
-                                                {/* Mobile Scroll Hint (Only Visible on Small Screens) */}
-                                                <div className="md:hidden flex flex-col items-center animate-bounce opacity-60 pointer-events-none mb-2">
-                                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Scroll Down</span>
-                                                    <ChevronDown className="w-4 h-4 text-slate-500" />
-                                                </div>
-
+                                            {/* Action Button */}
+                                            <div className="pt-4 flex justify-center pb-2">
                                                 <button
                                                     onClick={() => {
                                                         setSelectedFireType(null);
                                                         document.getElementById('calculator-section')?.scrollIntoView({ behavior: 'smooth' });
                                                     }}
                                                     className={`
-                                                        group flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-base shadow-xl transition-all transform hover:-translate-y-1
-                                                        bg-gradient-to-r ${selectedFireType.gradient} text-white w-full sm:w-auto justify-center
+                                                        group flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold text-sm md:text-base shadow-xl transition-all transform hover:-translate-y-1 w-full md:w-auto
+                                                        bg-gradient-to-r ${selectedFireType.gradient} text-white
                                                     `}
                                                 >
                                                     Calculate {selectedFireType.title}
