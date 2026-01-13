@@ -164,11 +164,11 @@ const FireTypes = () => {
                                     relative w-[85%] max-w-xl max-h-[75vh] flex flex-col rounded-[2rem] shadow-2xl
                                     bg-gradient-to-br ${selectedFireType.bgGradient} border border-white/50
                                     [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
-                                    my-auto mx-auto
+                                    my-auto mx-auto overflow-hidden
                                 `}
                             >
                                 {/* Fixed Close Button Header */}
-                                <div className="absolute top-0 right-0 z-20 p-4">
+                                <div className="absolute top-0 right-0 z-50 p-4">
                                     <button
                                         onClick={() => setSelectedFireType(null)}
                                         className="p-2 bg-white/50 hover:bg-white rounded-full transition-colors backdrop-blur-sm shadow-sm"
@@ -179,10 +179,10 @@ const FireTypes = () => {
 
                                 {/* Scrollable Content */}
                                 {/* ADDED pt-12 to fix "Edges Touching" on Mobile */}
-                                <div className="p-6 pt-12 md:p-8 pb-4 overflow-y-auto relative flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                                    {/* Background Watermark */}
-                                    <div className="absolute -bottom-10 -right-10 opacity-[0.05] transform rotate-12 pointer-events-none">
-                                        {React.cloneElement(selectedFireType.icon, { size: 200, className: `text-black` })}
+                                <div className="p-6 pt-16 md:p-8 pb-6 overflow-y-auto relative flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                                    {/* Background Watermark - Strictly Layered Behind */}
+                                    <div className="absolute top-20 right-[-20px] opacity-[0.03] transform rotate-12 pointer-events-none z-0">
+                                        {React.cloneElement(selectedFireType.icon, { size: 250, className: `text-slate-900` })}
                                     </div>
 
                                     <div className="relative z-10">
