@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFire } from '../../context/FireContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, RefreshCw, TrendingUp, Zap, AlertTriangle, CheckCircle, Target, Wallet, FileText, Share2, X, Link, Mail, MessageCircle } from 'lucide-react';
+import { Download, RefreshCw, TrendingUp, Zap, AlertTriangle, CheckCircle, Target, Wallet, FileText, Share2, X, Link, Mail, MessageCircle, ArrowLeft } from 'lucide-react';
 import { generateFireReport, createReportDoc, getFireReportBlob } from '../Report/DownloadReport';
 import { handleShareReport, downloadPDF } from '../../utils/shareUtils';
 import Tooltip from '../UI/Tooltip';
@@ -549,12 +549,13 @@ const FireWidget = () => {
                     <div className={`lg:col-span-7 flex flex-col h-full space-y-5 ${!showResults ? 'hidden lg:flex' : 'flex'}`}>
 
                         {/* Mobile Back Button */}
-                        <div className="lg:hidden mb-2">
+                        <div className="lg:hidden mb-4">
                             <button
                                 onClick={() => setShowResults(false)}
-                                className="text-slate-500 font-bold text-sm flex items-center hover:text-indigo-600 transition-colors"
+                                className="w-auto inline-flex py-2 px-4 bg-white border border-indigo-200 rounded-full shadow-sm text-indigo-700 font-bold text-xs flex items-center justify-center gap-2 hover:bg-indigo-50 transition-all active:scale-95 group"
                             >
-                                ← Edit Inputs
+                                <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+                                <span>Modify Inputs</span>
                             </button>
                         </div>
 
