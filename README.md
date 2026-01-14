@@ -29,6 +29,7 @@ A modern, interactive financial planning tool designed to help you demystify the
 4.  **Save Your Plan**: Click "Download Report" to get a professional PDF of your strategy.
 
 ---
+
 ## 🧠 Project Mind Map (Detailed Workflow)
 
 ```mermaid
@@ -85,7 +86,10 @@ mindmap
       Awareness["Better Financial Awareness"]
       Shareable["Shareable Report"]
       Planning["Practical FIRE Planning"]
+```
+
 ---
+
 ## 💻 How to Run This Website Locally
 
 **This is a frontend-only application built using React and Vite. No backend or authentication setup is required.**
