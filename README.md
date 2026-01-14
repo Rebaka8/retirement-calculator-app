@@ -30,6 +30,69 @@ A modern, interactive financial planning tool designed to help you demystify the
 
 ---
 
+## 🧠 Project Mind Map (Detailed Workflow)
+
+```mermaid
+mindmap
+  root((FIRE Number Web App | firetracker.in))
+    User_Education_Layer["User Education Layer(Financial Awareness Before Action)"]
+      What_is_FIRE["What is FIRE Number?"]
+      Why_FIRE["Why FIRE is Important"]
+      Where_FIRE["Where FIRE is Used"]
+      Types_of_FIRE["Types of FIRE"]
+        Lean_FIRE["Lean FIRE"]
+        Fat_FIRE["Fat FIRE"]
+        Coast_FIRE["Coast FIRE"]
+        Barista_FIRE["Barista FIRE"]
+        Traditional_FIRE["Traditional FIRE"]
+        Slow_FIRE["Slow FIRE"]
+      Simple_Truths["Simple Truths of FIRE"]
+      Real_Life_Impact["Real-life Impact"]
+      FAQ["FAQ Section"]
+
+    User_Input_Selection["User Input & Selection(Personalization Entry Point)"]
+      Calculation_Type["Select Calculation Type"]
+        Income_Based["Income-based FIRE"]
+        Goal_Based["Goal-based FIRE"]
+      Financial_Inputs["Financial Inputs"]
+        Expenses["Expenses"]
+        Lifestyle_Goals["Lifestyle Goals"]
+        Targets["Targets"]
+        Age["Age"]
+
+    Frontend_Engine["Frontend Calculation Engine(Client-side Logic)"]
+      JS_Calc["JavaScript-based Calculations"]
+      Real_Time["Real-time Processing"]
+      No_Backend["No Backend Dependency"]
+      Privacy["Privacy-friendly (No Data Storage)"]
+
+    Result_Interpretation["Result Interpretation(Meaningful Output)"]
+      FIRE_Number["Personalized FIRE Number"]
+      Explanation["Explanation of Calculation"]
+      Insights["Contextual Insights"]
+
+    PDF_Generation["PDF Report Generation(Structured Financial Summary)"]
+      Input_Summary["User Inputs Summary"]
+      Result["FIRE Number Result"]
+      Guidance["Interpretation & Guidance"]
+      PDF_Export["Exported as PDF"]
+
+    Download_Sharing["Download & Sharing Layer(Device-Aware UX)"]
+      Download["Download PDF"]
+        Mobile_Download["Mobile ✔"]
+        Desktop_Download["Desktop ✔"]
+      Sharing_Logic["Sharing Logic"]
+        Mobile_Share["Mobile → Direct PDF Share"]
+        Desktop_Share["Desktop → Cloudinary Upload → Shareable Link"]
+
+    Final_Outcome["Final User Outcome(Actionable Financial Clarity)"]
+      Awareness["Better Financial Awareness"]
+      Shareable["Shareable Report"]
+      Planning["Practical FIRE Planning"]
+```
+
+---
+
 ## 💻 How to Run This Website Locally
 
 **This is a frontend-only application built using React and Vite. No backend or authentication setup is required.**
@@ -80,19 +143,6 @@ http://localhost:5173
 
 **The website will load instantly and you can start using the FIRE calculator without any login or setup.**
 
----
-
-**Production Build (Optional)**
-
-To create a production build:
-```bash
-npm run build
-```
-
-To preview the production build locally:
-```bash
-npm run preview
-```
 ---
 
 *Code, Caffeine, and Compound Interest.*  
