@@ -290,6 +290,12 @@ const FireWidget = () => {
         }
     };
 
+    const handleDownload = () => {
+        generateFireReport(data, fireNumbers, mode);
+        setToastMsg("✅ Report Downloaded!");
+        setTimeout(() => setToastMsg(null), 3000);
+    };
+
     const executeShare = async (platform, directBlob = null, suppressToast = false) => {
         const blobToUse = directBlob || shareBlob;
         if (!blobToUse) return;
@@ -303,9 +309,7 @@ const FireWidget = () => {
             };
 
             if (platform === 'download') {
-                downloadPDF(blobToUse);
-                setToastMsg("✅ Download started!");
-                setTimeout(() => setToastMsg(null), 3000);
+                handleDownload();
                 setIsSharing(false);
                 return;
             }
@@ -325,11 +329,15 @@ const FireWidget = () => {
                 if (platform === 'copy' || platform === 'copy-text') {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
+                    setToastMsg("🔗 Link Copied!");
+                } else if (platform === 'native') {
+                    setToastMsg("🚀 Share Complete!");
+                } else if (platform === 'whatsapp') {
+                    setToastMsg("✅ Opened WhatsApp!");
                 }
-                if (!suppressToast && result.message) {
-                    setToastMsg(result.message);
-                    setTimeout(() => setToastMsg(null), 4000);
-                }
+
+                // Clear toast
+                setTimeout(() => setToastMsg(null), 3000);
             } else {
                 // Fallback for Copy Link on Mobile (Async Clipboard Blocked)
                 if (platform === 'copy' && result.error === 'clipboard_failed') {
@@ -337,9 +345,9 @@ const FireWidget = () => {
                     await shareViaNative(result.link, null);
                     setToastMsg("🔗 Link active! Share manually.");
                 } else {
-                    setToastMsg(result.message);
+                    setToastMsg(result.message || "❌ Sharing failed");
                 }
-                setTimeout(() => setToastMsg(null), 5000);
+                setTimeout(() => setToastMsg(null), 4000);
             }
 
         } catch (error) {
@@ -360,11 +368,13 @@ const FireWidget = () => {
                         initial={{ opacity: 0, y: 50, x: '-50%' }}
                         animate={{ opacity: 1, y: 0, x: '-50%' }}
                         exit={{ opacity: 0, y: 20, x: '-50%' }}
-                        className="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 z-[60] bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 w-[90%] max-w-md"
+                        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] bg-slate-900/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 w-[90%] max-w-sm border border-slate-700/50"
                         onClick={() => setToastMsg(null)}
                     >
-                        <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-                        <p className="text-xs font-bold leading-relaxed flex-1">
+                        <div className="bg-emerald-500/20 p-2 rounded-full">
+                            <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
+                        </div>
+                        <p className="text-sm font-bold leading-none flex-1">
                             {toastMsg}
                         </p>
                     </motion.div>
@@ -696,7 +706,7 @@ const FireWidget = () => {
                             </button>
 
                             <button
-                                onClick={() => generateFireReport(data, fireNumbers, mode)}
+                                onClick={handleDownload}
                                 className="flex-[2] flex items-center justify-center gap-2 px-5 py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-200 transition-all hover:-translate-y-1 active:scale-95 text-sm"
                             >
                                 <Download className="w-4 h-4" />

@@ -98,7 +98,7 @@ const copyLinkToClipboard = async (link) => {
 
 const shareViaWhatsApp = (link, pdfBlob, popupWindow = null) => {
     // 1. WhatsApp Text with Domain
-    const textMessage = encodeURIComponent(`Check out my FIRE Plan on https://www.firetracker.in : ${link}`);
+    const textMessage = encodeURIComponent(`Check out your fire number on ${link}`);
 
     const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
 
@@ -113,7 +113,7 @@ const shareViaWhatsApp = (link, pdfBlob, popupWindow = null) => {
             navigator.share({
                 files: [file],
                 title: 'FIRE Freedom Plan',
-                text: 'Check out my FIRE report on https://www.firetracker.in',
+                text: 'Check out your fire number on',
                 url: 'https://www.firetracker.in'
             }).catch(() => { });
             return { success: true };
@@ -145,13 +145,13 @@ const shareViaNative = async (link, pdfBlob) => {
             await navigator.share({
                 files: [file],
                 title: '📊 FIRE Freedom Plan',
-                text: 'Check out my FIRE report on https://www.firetracker.in',
+                text: 'Check out your fire number on',
                 url: 'https://www.firetracker.in'
             });
         } else {
             await navigator.share({
                 title: 'FIRE Report',
-                text: 'Check out my FIRE report on https://www.firetracker.in',
+                text: 'Check out your fire number on',
                 url: link
             });
         }
