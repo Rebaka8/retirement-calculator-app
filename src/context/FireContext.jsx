@@ -39,23 +39,33 @@ export const FireProvider = ({ children }) => {
 
     const fireNumbers = useMemo(() => {
         const expenses = parseFloat(data.annualExpenses) || 0;
+        const COAST_TARGET_AGE = 60;
+        const IMPOSSIBLE = Number.POSITIVE_INFINITY;
+        // const LOW_REAL_RETURN_THRESHOLD = 0.005; // Could be used for UI validation
 
-        // Multipliers based on User Definitions
-        const traditionalFire = expenses * 25;       // Standard 4% rule
-        const leanFire = expenses * 12.5;            // 8% withdrawal (50% expenses)
-        const fatFire = expenses * 50;               // 2% withdrawal (Luxury)
-        const baristaFire = expenses * 12.5;         // Same as Lean (Part-time covers rest)
-        const slowFire = expenses * 33.33;           // 3% withdrawal (Conservative)
+        // Calculate Real Return for Coast FIRE logic validity
+        const r = (parseFloat(data.investmentReturnRate) || 6) / 100;
+        const i = (parseFloat(data.inflationRate) || 3) / 100;
+        const realReturn = ((1 + r) / (1 + i)) - 1;
 
-        // Coast FIRE: Amount needed NOW to hit Traditional FIRE by 60 without further saving
-        const currentAgeVal = parseFloat(data.currentAge) || 30; // Changed to currentAge as per recent naming
-        const yearsTo60 = Math.max(0, 60 - currentAgeVal);
+        // Multipliers based on Industry Standards & User Feedback
+        const traditionalFire = expenses * 25;       // Standard 25x (4% rule)
+        const leanFire = expenses * 20;              // 25x of 80% expenses (More frugal)
+        const fatFire = expenses * 50;               // 50x expenses (2% withdrawal for luxury)
+        const baristaFire = expenses * 15;           // 25x of 60% expenses (Assumes side gig covers 40%)
 
-        // Use Real Rate for Coasting calculation ?? Or Nominal?
-        // Standard Coast FIRE usually uses Nominal Rate assumption for compounding (e.g. 8% growth)
-        // User example used 1.08 assuming 8%. Let's use user's investmentReturnRate (nominal).
-        const rate = (parseFloat(data.investmentReturnRate) || 6) / 100;
-        const coastFire = traditionalFire / Math.pow(1 + rate, yearsTo60);
+        // Coast FIRE: Amount needed TODAY to grow to Traditional FIRE by Age 60 without further contribution
+        let coastFire;
+        if (realReturn <= 0) {
+            coastFire = IMPOSSIBLE;
+        } else {
+            const currentAge = parseFloat(data.currentAge) || 25; // Default age if missing
+            const yearsToGrow = Math.max(0, COAST_TARGET_AGE - currentAge);
+            coastFire = traditionalFire / Math.pow(1 + realReturn, yearsToGrow);
+        }
+
+        // Slow FIRE: Target is same as traditional, but implemented via verifying path with lower savings rate
+        const slowFire = traditionalFire;
 
         return {
             lean: leanFire,
@@ -95,8 +105,18 @@ export const FireProvider = ({ children }) => {
         const inflation = (parseFloat(currentData.inflationRate) || 3) / 100;
         const realReturn = ((1 + returnRate) / (1 + inflation)) - 1;
 
-        if (savings <= 0 && netWorth < target) return '∞'; // Changed condition to allow coasting if NetWorth > Target
+        // Check if goal is reachable
+        // 1. If we are already there
         if (netWorth >= target) return '0';
+
+        // 2. If savings are negative/zero AND we don't have enough growth from corpus to overcome it
+        // If savings is 0, we can still reach target if realReturn > 0 and netWorth > 0
+        if (savings <= 0) {
+            if (realReturn <= 0) return '∞'; // No growth, no savings -> Never reach
+            if (netWorth <= 0) return '∞';  // No corpus, no savings -> Never reach
+            // If netWorth * realReturn + savings < 0, we are losing money faster than growing
+            if ((netWorth * realReturn) + savings <= 0) return '∞';
+        }
 
         // NPER logic
         // n = ln((PMT + PV*r) / (PMT - FV*r)) / ln(1+r) ? 

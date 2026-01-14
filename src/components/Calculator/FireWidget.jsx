@@ -571,7 +571,7 @@ const FireWidget = () => {
                                         </label>
                                         <FormattedInput
                                             value={data.investmentReturnRate}
-                                            onChange={(e) => updateData('investmentReturnRate', parseVal(e.target.value))}
+                                            onChange={(e) => updateData('investmentReturnRate', e.target.value)}
                                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-emerald-600 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
                                         />
                                     </div>
@@ -582,7 +582,7 @@ const FireWidget = () => {
                                         </label>
                                         <FormattedInput
                                             value={data.inflationRate}
-                                            onChange={(e) => updateData('inflationRate', parseVal(e.target.value))}
+                                            onChange={(e) => updateData('inflationRate', e.target.value)}
                                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-rose-600 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all"
                                         />
                                     </div>
@@ -649,46 +649,133 @@ const FireWidget = () => {
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 flex-1">
                             {Object.entries(mode === 'income' ? fireNumbers : {
                                 traditional: data.targetCorpus,
-                                lean: data.targetCorpus * 0.7,
+                                lean: data.targetCorpus * 0.8,
                                 fat: data.targetCorpus * 2,
-                                barista: data.targetCorpus * 0.55,
-                                slow: data.targetCorpus * (33.33 / 25),
-                                coast: (() => {
-                                    // Calculate Coast for Goal Mode
-                                    // Target required NOW to grow to Goal in 'yearsToRetire'
-                                    const r = (data.investmentReturnRate - data.inflationRate) / 100;
-                                    const t = data.yearsToRetire || 15;
-                                    return data.targetCorpus / Math.pow(1 + (r > 0 ? r : 0.001), t);
-                                })()
+                                barista: data.targetCorpus * 0.6,
+                                slow: data.targetCorpus,
+                                coast: data.targetCorpus
                             }).map(([key, rawVal]) => {
-                                // In Goal Mode, use the Required Monthly Savings * 12 as the hypothetical "Annual Savings"
-                                // This shows "If I save the recommended amount, here is when I hit each milestone"
-                                const savingsParam = mode === 'income' ? null : (monthlySavings * 12);
+                                let val = rawVal;
+                                let isImpossible = false;
 
-                                const val = rawVal || 0;
-                                const years = calculateYearsToTarget(val, data, savingsParam);
-                                const corpus = formatToCr(val);
-                                const colorMap = {
-                                    lean: 'emerald', fat: 'yellow', barista: 'blue',
-                                    coast: 'purple', traditional: 'indigo', slow: 'teal'
+                                // Special Handling for Coast FIRE
+                                if (key === 'coast') {
+                                    if (mode !== 'income') {
+                                        // Goal Mode: Calculate Coast PV manually based on Target Corpus
+                                        const r = (parseFloat(data.investmentReturnRate) || 6) / 100;
+                                        const i = (parseFloat(data.inflationRate) || 3) / 100;
+                                        const realReturn = ((1 + r) / (1 + i)) - 1;
+
+                                        if (realReturn <= 0) {
+                                            val = Number.POSITIVE_INFINITY;
+                                        } else {
+                                            const currentAge = parseFloat(data.currentAge) || 25;
+                                            const yearsToGrow = Math.max(0, 60 - currentAge);
+                                            val = data.targetCorpus / Math.pow(1 + realReturn, yearsToGrow);
+                                        }
+                                    }
+
+                                    // Check for impossibility (from Context or Manual Calc above)
+                                    if (!Number.isFinite(val)) {
+                                        isImpossible = true;
+                                    }
+                                }
+
+                                // Savings Parameter Logic
+                                let savingsParam = null;
+                                // Coast FIRE check: We REMOVED the "savingsParam = 0" override. 
+                                // We now want to see how long to reach the Coast Number with CURRENT savings.
+
+                                // Slow FIRE: Slower path, assume only 15% savings of income
+                                if (key === 'slow') savingsParam = (data.annualIncome || 0) * 0.15;
+
+                                // Goal Mode Override for others
+                                if (mode !== 'income' && key !== 'coast' && key !== 'slow') {
+                                    savingsParam = monthlySavings * 12;
+                                }
+
+                                const years = isImpossible ? '--' : calculateYearsToTarget(val, data, savingsParam);
+                                const corpus = isImpossible ? 'N/A' : formatToCr(val);
+
+                                // Tailwind Static Class Map
+                                const CARD_STYLES = {
+                                    lean: {
+                                        border: 'hover:border-emerald-200',
+                                        line: 'bg-emerald-500',
+                                        badge: 'text-emerald-600 bg-emerald-50'
+                                    },
+                                    fat: {
+                                        border: 'hover:border-yellow-200',
+                                        line: 'bg-yellow-500',
+                                        badge: 'text-yellow-600 bg-yellow-50'
+                                    },
+                                    barista: {
+                                        border: 'hover:border-blue-200',
+                                        line: 'bg-blue-500',
+                                        badge: 'text-blue-600 bg-blue-50'
+                                    },
+                                    coast: {
+                                        border: 'hover:border-purple-200',
+                                        line: 'bg-purple-500',
+                                        badge: 'text-purple-600 bg-purple-50'
+                                    },
+                                    traditional: {
+                                        border: 'hover:border-indigo-200',
+                                        line: 'bg-indigo-500',
+                                        badge: 'text-indigo-600 bg-indigo-50'
+                                    },
+                                    slow: {
+                                        border: 'hover:border-teal-200',
+                                        line: 'bg-teal-500',
+                                        badge: 'text-teal-600 bg-teal-50'
+                                    }
+                                };
+
+                                const style = CARD_STYLES[key] || CARD_STYLES.traditional;
+
+                                const descriptions = {
+                                    lean: '( Covers 80% Expenses )',
+                                    barista: '( with Part-time Income )',
+                                    coast: '( Reach this & stop investing )',
+                                    slow: '( Enjoy life, Save 15% )',
+                                    fat: '( Luxury Lifestyle )',
+                                    traditional: '( Standard 4% Rule )'
+                                };
+
+                                const tooltips = {
+                                    coast: "Years until you can stop investing and let compounding do the rest (Target: Age 60)."
                                 };
 
                                 // Skip 'normal' or other internal keys
                                 if (key === 'normal') return null;
 
                                 return (
-                                    <div key={key} className={`bg-white border border-slate-100 p-3 rounded-xl shadow-sm relative overflow-hidden group hover:border-${colorMap[key]}-200 transition-colors`}>
-                                        <div className={`absolute top-0 left-0 w-1 h-full bg-blue-500`} />
+                                    <div key={key} className={`bg-white border border-slate-100 p-3 rounded-xl shadow-sm relative overflow-hidden group transition-colors ${style.border}`}>
+                                        <div className={`absolute top-0 left-0 w-1 h-full ${style.line}`} />
                                         <div className="pl-2 h-full flex flex-col justify-between">
                                             <div>
-                                                <div className="text-[10px] font-bold text-slate-400 uppercase">{key} FIRE</div>
-                                                <div className="font-bold text-slate-800 text-xl">{corpus} Cr</div>
+                                                <div className="flex justify-between items-start">
+                                                    <div className="text-[10px] font-bold text-slate-400 uppercase">{key} FIRE</div>
+                                                    <Tooltip text={tooltips[key] || descriptions[key]} />
+                                                </div>
+                                                <div className="font-bold text-slate-800 text-xl">
+                                                    {isImpossible ? (
+                                                        <span className="text-xs text-rose-500">Coast FIRE not possible with non-positive real returns</span>
+                                                    ) : (
+                                                        <>{corpus} Cr</>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="mt-2">
-                                                <span className={`text-xs font-extrabold text-${colorMap[key]}-600 bg-${colorMap[key]}-50 px-2 py-0.5 rounded`}>
-                                                    {years} Years
-                                                </span>
+                                            <div className="mt-2 text-xs text-slate-500 font-medium">
+                                                {descriptions[key]}
                                             </div>
+                                            {!isImpossible && (
+                                                <div className="mt-2">
+                                                    <span className={`text-xs font-extrabold px-2 py-0.5 rounded ${style.badge}`}>
+                                                        {years} Years
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 );
