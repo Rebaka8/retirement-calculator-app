@@ -9,31 +9,82 @@ import ScrollArrow from '../UI/ScrollArrow';
 
 
 
-const InputPair = ({ label, value, min, max, step, onChange, color = "blue", suffix = "", tooltip }) => (
-    <div>
-        <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center">
-                <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">{label}</label>
-                {tooltip && <Tooltip text={tooltip} />}
-            </div>
-            <div className="flex items-center gap-2">
-                <input
-                    type="number"
-                    value={value}
-                    onChange={onChange}
-                    className={`w-36 bg-white border border-slate-200 rounded-lg px-3 py-2 text-right font-bold text-${color}-600 focus:outline-none focus:ring-2 focus:ring-${color}-500 transition-all`}
-                />
-                {suffix && <span className="text-sm font-bold text-slate-400">{suffix}</span>}
-            </div>
-        </div>
+const formatVal = (v) => {
+    if (v === "" || v === undefined || v === null) return "";
+    // Handle 0 explicitly if needed, but NumberFormat handles 0 -> "0"
+    return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(v);
+};
+
+const parseVal = (val) => {
+    if (!val) return "";
+    const clean = val.replace(/,/g, '').replace(/[^\d.]/g, ''); // Remove commas and non-digits
+    return clean === "" ? "" : Number(clean);
+};
+
+// Helper Component to manage local formatting state (Prevents "5." -> "5" jumping)
+const FormattedInput = ({ value, onChange, className, ...props }) => {
+    const [local, setLocal] = useState(() => formatVal(value));
+
+    // Sync with external changes (e.g. slider overrides, reset)
+    useEffect(() => {
+        const parsedLocal = parseVal(local);
+        // Only override local state if key difference (e.g. parent changed independently)
+        if (parsedLocal !== value) {
+            setLocal(formatVal(value));
+        }
+    }, [value]);
+
+    const handleChange = (e) => {
+        const raw = e.target.value;
+        setLocal(raw); // Allow typing "1,00" or "5."
+        const num = parseVal(raw);
+        onChange({ target: { value: num } });
+    };
+
+    const handleBlur = () => {
+        // On blur, strictly format to clean up (e.g. "5." -> "5")
+        setLocal(formatVal(value));
+    };
+
+    return (
         <input
-            type="range" min={min} max={max} step={step}
-            value={value}
-            onChange={onChange}
-            className={`w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-${color}-600`}
+            {...props}
+            type="text"
+            inputMode="decimal"
+            value={local}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            className={className}
         />
-    </div>
-);
+    );
+};
+
+const InputPair = ({ label, value, min, max, step, onChange, color = "blue", suffix = "", tooltip }) => {
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center">
+                    <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">{label}</label>
+                    {tooltip && <Tooltip text={tooltip} />}
+                </div>
+                <div className="flex items-center gap-2">
+                    <FormattedInput
+                        value={value}
+                        onChange={onChange}
+                        className={`w-36 bg-white border border-slate-200 rounded-lg px-3 py-2 text-right font-bold text-${color}-600 focus:outline-none focus:ring-2 focus:ring-${color}-500 transition-all`}
+                    />
+                    {suffix && <span className="text-sm font-bold text-slate-400">{suffix}</span>}
+                </div>
+            </div>
+            <input
+                type="range" min={min} max={max} step={step}
+                value={value || 0}
+                onChange={onChange}
+                className={`w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-${color}-600`}
+            />
+        </div>
+    );
+};
 
 const FireWidget = () => {
     const {
@@ -488,10 +539,9 @@ const FireWidget = () => {
                                             <label className="text-xs font-bold text-slate-500">Current Savings</label>
                                             <Tooltip text="The total value of your existing investments (PF, Stocks, MFs, etc.) today." />
                                         </div>
-                                        <input
-                                            type="number"
+                                        <FormattedInput
                                             value={data.currentCorpus || 0}
-                                            onChange={(e) => updateData('currentCorpus', Number(e.target.value))}
+                                            onChange={(e) => updateData('currentCorpus', parseVal(e.target.value))}
                                             className="w-32 bg-white border border-slate-200 rounded-lg text-right px-2 py-1.5 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-slate-400 transition-all"
                                         />
                                     </div>
@@ -509,10 +559,9 @@ const FireWidget = () => {
                                             Return Rate (%)
                                             <Tooltip text="Expected average annual annual growth of your portfolio." />
                                         </label>
-                                        <input
-                                            type="number"
+                                        <FormattedInput
                                             value={data.investmentReturnRate}
-                                            onChange={(e) => updateData('investmentReturnRate', Number(e.target.value))}
+                                            onChange={(e) => updateData('investmentReturnRate', parseVal(e.target.value))}
                                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-emerald-600 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
                                         />
                                     </div>
@@ -521,10 +570,9 @@ const FireWidget = () => {
                                             Inflation (%)
                                             <Tooltip text="The rate at which cost of living increases. Avg ~6% in India." />
                                         </label>
-                                        <input
-                                            type="number"
+                                        <FormattedInput
                                             value={data.inflationRate}
-                                            onChange={(e) => updateData('inflationRate', Number(e.target.value))}
+                                            onChange={(e) => updateData('inflationRate', parseVal(e.target.value))}
                                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-rose-600 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all"
                                         />
                                     </div>

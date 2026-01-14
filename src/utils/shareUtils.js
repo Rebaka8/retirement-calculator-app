@@ -97,7 +97,8 @@ const copyLinkToClipboard = async (link) => {
 };
 
 const shareViaWhatsApp = (link, pdfBlob, popupWindow = null) => {
-    const message = encodeURIComponent(link);
+    // 1. WhatsApp Text with Domain
+    const textMessage = encodeURIComponent(`Check out my FIRE Plan on https://www.firetracker.in : ${link}`);
 
     const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
 
@@ -111,14 +112,15 @@ const shareViaWhatsApp = (link, pdfBlob, popupWindow = null) => {
             if (popupWindow) popupWindow.close(); // Close if we used native share
             navigator.share({
                 files: [file],
-                title: 'FIRE Freedom Plan'
+                title: 'FIRE Freedom Plan',
+                text: 'Check out my FIRE report on https://www.firetracker.in',
+                url: 'https://www.firetracker.in'
             }).catch(() => { });
             return { success: true };
         }
     }
 
     // Fallback for Desktop: Use the generated Cloudinary Link
-    const textMessage = encodeURIComponent(link);
     const url = `https://api.whatsapp.com/send?text=${textMessage}`;
 
     if (popupWindow) {
@@ -142,11 +144,14 @@ const shareViaNative = async (link, pdfBlob) => {
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
                 files: [file],
-                title: '📊 FIRE Freedom Plan'
+                title: '📊 FIRE Freedom Plan',
+                text: 'Check out my FIRE report on https://www.firetracker.in',
+                url: 'https://www.firetracker.in'
             });
         } else {
             await navigator.share({
                 title: 'FIRE Report',
+                text: 'Check out my FIRE report on https://www.firetracker.in',
                 url: link
             });
         }
